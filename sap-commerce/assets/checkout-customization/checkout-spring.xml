@@ -12,7 +12,7 @@
     <!-- Custom Checkout Facade -->
     <alias name="defaultCustomCheckoutFacade" alias="customCheckoutFacade"/>
     <bean id="defaultCustomCheckoutFacade"
-          class="com.company.facades.impl.DefaultCustomCheckoutFacade">
+          class="com.example.facades.impl.DefaultCustomCheckoutFacade">
         <property name="cartService" ref="cartService"/>
         <property name="modelService" ref="modelService"/>
         <property name="customOptionService" ref="customOptionService"/>
@@ -20,7 +20,7 @@
 
     <!-- Custom Checkout Step Controller -->
     <bean id="customCheckoutStepController"
-          class="com.company.storefront.controllers.pages.checkout.steps.CustomCheckoutStepController">
+          class="com.example.storefront.controllers.pages.checkout.steps.CustomCheckoutStepController">
         <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
     </bean>
 
@@ -59,12 +59,12 @@
 
     <!-- Step Validator -->
     <bean id="customCheckoutStepValidator"
-          class="com.company.storefront.validators.CustomCheckoutStepValidator">
+          class="com.example.storefront.validators.CustomCheckoutStepValidator">
         <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
     </bean>
 
     <!-- Form Validator -->
     <bean id="customStepFormValidator"
-          class="com.company.storefront.validators.CustomStepFormValidator"/>
+          class="com.example.storefront.validators.CustomStepFormValidator"/>
 
 </beans>

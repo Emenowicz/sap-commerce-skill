@@ -63,11 +63,11 @@ echo ""
 
 # Create directory structure
 mkdir -p "$EXT_PATH/resources/localization"
-mkdir -p "$EXT_PATH/src/com/company/$EXT_NAME/constants"
-mkdir -p "$EXT_PATH/src/com/company/$EXT_NAME/setup"
-mkdir -p "$EXT_PATH/src/com/company/$EXT_NAME/daos/impl"
-mkdir -p "$EXT_PATH/src/com/company/$EXT_NAME/services/impl"
-mkdir -p "$EXT_PATH/src/com/company/$EXT_NAME/facades/impl"
+mkdir -p "$EXT_PATH/src/com/example/$EXT_NAME/constants"
+mkdir -p "$EXT_PATH/src/com/example/$EXT_NAME/setup"
+mkdir -p "$EXT_PATH/src/com/example/$EXT_NAME/daos/impl"
+mkdir -p "$EXT_PATH/src/com/example/$EXT_NAME/services/impl"
+mkdir -p "$EXT_PATH/src/com/example/$EXT_NAME/facades/impl"
 mkdir -p "$EXT_PATH/testsrc"
 
 # Generate extensioninfo.xml
@@ -77,7 +77,7 @@ cat > "$EXT_PATH/extensioninfo.xml" << EOF
                xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
 
     <extension name="$EXT_NAME"
-               classprefix="$(echo ${EXT_NAME^})"
+               classprefix="$(echo "$EXT_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')"
                version="1.0.0">
 
 EOF
@@ -95,7 +95,7 @@ cat >> "$EXT_PATH/extensioninfo.xml" << EOF
 
         <coremodule generated="true"
                     manager="de.hybris.platform.jalo.extension.ExtensionManager"
-                    packageroot="com.company.$EXT_NAME"/>
+                    packageroot="com.example.$EXT_NAME"/>
 
     </extension>
 </extensioninfo>
@@ -130,7 +130,7 @@ cat > "$EXT_PATH/resources/${EXT_NAME}-spring.xml" << EOF
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="com.company.$EXT_NAME"/>
+    <context:component-scan base-package="com.example.$EXT_NAME"/>
 
     <!-- DAO Beans -->
 
@@ -148,9 +148,9 @@ cat > "$EXT_PATH/resources/localization/${EXT_NAME}-locales_en.properties" << EO
 EOF
 
 # Generate Constants class
-CONST_CLASS="$(echo ${EXT_NAME^})Constants"
-cat > "$EXT_PATH/src/com/company/$EXT_NAME/constants/${CONST_CLASS}.java" << EOF
-package com.company.$EXT_NAME.constants;
+CONST_CLASS="$(echo "$EXT_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')Constants"
+cat > "$EXT_PATH/src/com/example/$EXT_NAME/constants/${CONST_CLASS}.java" << EOF
+package com.example.$EXT_NAME.constants;
 
 /**
  * Global constants for $EXT_NAME extension.
@@ -166,11 +166,11 @@ public final class ${CONST_CLASS} {
 EOF
 
 # Generate SystemSetup class
-SETUP_CLASS="$(echo ${EXT_NAME^})SystemSetup"
-cat > "$EXT_PATH/src/com/company/$EXT_NAME/setup/${SETUP_CLASS}.java" << EOF
-package com.company.$EXT_NAME.setup;
+SETUP_CLASS="$(echo "$EXT_NAME" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')SystemSetup"
+cat > "$EXT_PATH/src/com/example/$EXT_NAME/setup/${SETUP_CLASS}.java" << EOF
+package com.example.$EXT_NAME.setup;
 
-import com.company.$EXT_NAME.constants.${CONST_CLASS};
+import com.example.$EXT_NAME.constants.${CONST_CLASS};
 
 import de.hybris.platform.core.initialization.SystemSetup;
 import de.hybris.platform.core.initialization.SystemSetup.Process;

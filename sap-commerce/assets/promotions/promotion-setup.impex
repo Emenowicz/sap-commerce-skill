@@ -1,0 +1,49 @@
+# Promotion Setup ImpEx
+# Configures promotion groups, source rules, coupons, and triggers.
+
+# -----------------------------------------------
+# 1. Promotion Group
+# -----------------------------------------------
+INSERT_UPDATE PromotionGroup; identifier[unique=true]
+                            ; myStorePromoGroup
+
+# -----------------------------------------------
+# 2. Coupons
+# -----------------------------------------------
+
+# Single-code coupon (one code, shared by all customers)
+INSERT_UPDATE SingleCodeCoupon; couponId[unique=true]; name[lang=en]           ; active; maxRedemptionsPerCustomer; maxTotalRedemptions; startDate[dateformat=yyyy-MM-dd]; endDate[dateformat=yyyy-MM-dd]
+                              ; SUMMER20             ; Summer 20% Off Coupon   ; true  ; 1                       ; 10000             ; 2024-06-01                     ; 2024-08-31
+
+# Multi-code coupon configuration
+INSERT_UPDATE CouponGenerationConfiguration; name[unique=true]      ; prefix; separator; codeLength; couponCharset(code)
+                                           ; loyalty-code-config    ; VIP   ; -        ; 8         ; ALPHANUMERIC
+
+INSERT_UPDATE MultiCodeCoupon; couponId[unique=true]; name[lang=en]         ; active; codeGenerationConfiguration(name)
+                             ; LOYALTY2024          ; Loyalty Reward Codes  ; true  ; loyalty-code-config
+
+# -----------------------------------------------
+# 3. Promotion Source Rules
+# -----------------------------------------------
+
+# Order-level: 10% off orders over $100
+INSERT_UPDATE PromotionSourceRule; code[unique=true]    ; name[lang=en]                ; description[lang=en]                                 ; priority; stackable[default=false]; status(code); website(identifier); promotionGroup(identifier); startDate[dateformat=yyyy-MM-dd]; endDate[dateformat=yyyy-MM-dd]
+                                 ; order10pctOff100     ; 10% Off Orders Over $100     ; Get 10% off when your order total exceeds $100       ; 100     ;                        ; PUBLISHED   ; myStore            ; myStorePromoGroup        ;                                ;
+
+# Order-level: Free shipping over $50
+INSERT_UPDATE PromotionSourceRule; code[unique=true]    ; name[lang=en]                ; description[lang=en]                                 ; priority; stackable[default=false]; status(code); website(identifier); promotionGroup(identifier)
+                                 ; freeShipping50       ; Free Shipping Over $50       ; Free standard shipping on orders over $50             ; 50      ; true                   ; PUBLISHED   ; myStore            ; myStorePromoGroup
+
+# Coupon-based: 20% off with SUMMER20 code
+INSERT_UPDATE PromotionSourceRule; code[unique=true]    ; name[lang=en]                ; description[lang=en]                                 ; priority; stackable[default=false]; status(code); website(identifier); promotionGroup(identifier)
+                                 ; summer20couponRule   ; Summer 20% Off with Coupon   ; Apply coupon code SUMMER20 for 20% off entire order  ; 200     ;                        ; PUBLISHED   ; myStore            ; myStorePromoGroup
+
+# Product-level: Buy 2 Get 1 Free on selected category
+INSERT_UPDATE PromotionSourceRule; code[unique=true]    ; name[lang=en]                ; description[lang=en]                                 ; priority; stackable[default=false]; status(code); website(identifier); promotionGroup(identifier)
+                                 ; buy2get1electronics  ; Buy 2 Get 1 Free Electronics ; Buy any 2 electronics items and get the cheapest free; 150     ;                        ; PUBLISHED   ; myStore            ; myStorePromoGroup
+
+# -----------------------------------------------
+# 4. Date-Limited Promotion (Flash Sale)
+# -----------------------------------------------
+INSERT_UPDATE PromotionSourceRule; code[unique=true]    ; name[lang=en]                ; description[lang=en]                                 ; priority; stackable[default=false]; status(code); website(identifier); promotionGroup(identifier); startDate[dateformat=yyyy-MM-dd HH:mm:ss]; endDate[dateformat=yyyy-MM-dd HH:mm:ss]
+                                 ; flashSale25          ; Flash Sale 25% Off           ; 24-hour flash sale: 25% off everything                ; 300     ;                        ; PUBLISHED   ; myStore            ; myStorePromoGroup        ; 2024-07-15 00:00:00                     ; 2024-07-15 23:59:59

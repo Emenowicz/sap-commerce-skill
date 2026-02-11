@@ -91,7 +91,7 @@ public class CustomCartPageController extends CartPageController {
 <!-- checkout-flow.xml -->
 <flow xmlns="http://www.springframework.org/schema/webflow">
 
-    <var name="checkoutForm" class="com.company.forms.CheckoutForm"/>
+    <var name="checkoutForm" class="com.example.forms.CheckoutForm"/>
 
     <view-state id="deliveryAddress" view="pages/checkout/deliveryAddress">
         <on-entry>

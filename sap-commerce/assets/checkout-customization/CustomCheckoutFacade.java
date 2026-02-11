@@ -2,7 +2,7 @@
  * CustomCheckoutFacade.java
  * Facade for custom checkout operations.
  */
-package com.company.facades;
+package com.example.facades;
 
 import java.util.List;
 

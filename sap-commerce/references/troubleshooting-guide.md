@@ -52,7 +52,7 @@ ant typecodecheck
 Ensure unique typecodes in `items.xml`:
 ```xml
 <itemtype code="CustomProduct" extends="Product"
-          jaloclass="com.company.jalo.CustomProduct"
+          jaloclass="com.example.jalo.CustomProduct"
           autocreate="true" generate="true">
     <deployment table="CustomProducts" typecode="10001"/>
 </itemtype>
@@ -239,7 +239,7 @@ Access at `/hac`. Use:
 ### Logging Configuration
 Add to `local.properties`:
 ```properties
-log4j2.logger.myextension.name = com.company.myextension
+log4j2.logger.myextension.name = com.example.myextension
 log4j2.logger.myextension.level = DEBUG
 ```
 
@@ -263,7 +263,7 @@ Connect IDE debugger to port 8000.
 grep -i "ERROR\|Exception" hybris/log/tomcat/console.log
 
 # Find specific class issues
-grep "com.company.myclass" hybris/log/y*.log
+grep "com.example.myclass" hybris/log/y*.log
 
 # Find slow queries
 grep "took [0-9]\{4,\}ms" hybris/log/y*.log

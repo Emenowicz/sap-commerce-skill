@@ -52,7 +52,7 @@ Define item types with inheritance using `extends`:
 ```xml
 <itemtype code="CustomProduct" extends="Product"
           autocreate="true" generate="true"
-          jaloclass="com.company.jalo.CustomProduct">
+          jaloclass="com.example.jalo.CustomProduct">
     <deployment table="CustomProducts" typecode="10001"/>
     <attributes>
         <!-- Custom attributes -->

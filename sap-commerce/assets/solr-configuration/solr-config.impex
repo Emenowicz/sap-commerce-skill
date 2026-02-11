@@ -1,0 +1,98 @@
+# Solr Search Configuration ImpEx
+# Complete setup for product search: server, indexed type, properties, queries, and indexer CronJobs.
+
+$productCatalog = myStoreProductCatalog
+$catalogVersion = Online
+$searchConfig = myStoreSearchConfig
+$indexedType = myStoreProductType
+
+# -----------------------------------------------
+# 1. Server Configuration
+# -----------------------------------------------
+INSERT_UPDATE SolrServerConfig; name[unique=true]; mode(code); embeddedMaster
+                              ; Default          ; embedded  ; true
+
+INSERT_UPDATE SolrEndpointUrl; solrServerConfig(name)[unique=true]; url[unique=true]           ; master
+                             ; Default                            ; http://localhost:8983/solr  ; true
+
+# -----------------------------------------------
+# 2. Facet Search Config
+# -----------------------------------------------
+INSERT_UPDATE SolrFacetSearchConfig; name[unique=true]; indexNamePrefix; solrServerConfig(name); languages(isocode); currencies(isocode); catalogVersions(catalog(id),version)
+                                   ; $searchConfig    ; mystoreindex   ; Default              ; en,de             ; USD,EUR           ; $productCatalog:$catalogVersion
+
+# -----------------------------------------------
+# 3. Indexed Type
+# -----------------------------------------------
+INSERT_UPDATE SolrIndexedType; identifier[unique=true]; type(code); solrFacetSearchConfig(name); defaultFieldValueProvider
+                             ; $indexedType           ; Product   ; $searchConfig              ; modelPropertyFieldValueProvider
+
+# -----------------------------------------------
+# 4. Indexed Properties
+# -----------------------------------------------
+INSERT_UPDATE SolrIndexedProperty; solrIndexedType(identifier)[unique=true]; name[unique=true]; type(code); sortableType(code); localized[default=false]; currency[default=false]; multiValue[default=false]; facet[default=false]; facetType(code); facetSort(code); priority; fieldValueProvider; useForSpellchecking[default=false]; useForAutocomplete[default=false]
+
+# Searchable text fields
+                                 ; $indexedType ; code          ; string      ;            ;       ;       ;       ;       ;               ;       ; 90  ; springELValueProvider              ;      ;
+                                 ; $indexedType ; name          ; text        ;            ; true  ;       ;       ;       ;               ;       ; 100 ; springELValueProvider              ; true ; true
+                                 ; $indexedType ; description   ; text        ;            ; true  ;       ;       ;       ;               ;       ; 50  ; springELValueProvider              ;      ;
+                                 ; $indexedType ; ean           ; string      ;            ;       ;       ;       ;       ;               ;       ; 70  ; springELValueProvider              ;      ;
+
+# Facet fields
+                                 ; $indexedType ; category      ; string      ;            ;       ;       ; true  ; true  ; Refine        ; Alpha ; 80  ; categoryCodeValueProvider          ;      ;
+                                 ; $indexedType ; brand         ; string      ;            ;       ;       ;       ; true  ; Refine        ; Alpha ; 70  ; springELValueProvider              ;      ;
+                                 ; $indexedType ; price         ; double      ;            ;       ; true  ;       ; true  ; MultiSelectOr ; Alpha ; 60  ; productPriceValueProvider          ;      ;
+                                 ; $indexedType ; inStockFlag   ; boolean     ;            ;       ;       ;       ; true  ; Refine        ;       ; 50  ; productInStockFlagValueProvider    ;      ;
+
+# Sort fields
+                                 ; $indexedType ; name-sort     ; sortabletext; text       ; true  ;       ;       ;       ;               ;       ; 40  ; springELValueProvider              ;      ;
+                                 ; $indexedType ; price-sort    ; double      ;            ;       ; true  ;       ;       ;               ;       ; 40  ; productPriceValueProvider          ;      ;
+                                 ; $indexedType ; score         ; double      ;            ;       ;       ;       ;       ;               ;       ; 30  ;                                    ;      ;
+
+# -----------------------------------------------
+# 5. Search Query Configuration (free-text boost settings)
+# -----------------------------------------------
+INSERT_UPDATE SolrSearchQueryTemplate; name[unique=true]; indexedType(identifier)[unique=true]; showFacets; ftsQueryBuilder
+                                     ; DEFAULT          ; $indexedType                        ; true      ;
+
+INSERT_UPDATE SolrSearchQueryProperty; indexedProperty(name, solrIndexedType(identifier))[unique=true]; searchQueryTemplate(name, indexedType(identifier))[unique=true]; facet; ftsPhraseQuery; ftsPhraseQueryBoost; ftsQuery; ftsQueryBoost; ftsFuzzyQuery; ftsFuzzyQueryBoost; ftsWildcardQuery; ftsWildcardQueryType(code); includeInResponse
+                                     ; name:$indexedType        ; DEFAULT:$indexedType ; ; true ; 100 ; true ; 50 ; true ; 25 ;      ;         ; true
+                                     ; code:$indexedType        ; DEFAULT:$indexedType ; ; true ; 90  ; true ; 60 ;      ;    ; true ; POSTFIX ; true
+                                     ; description:$indexedType ; DEFAULT:$indexedType ; ;      ;     ; true ; 20 ; true ; 10 ;      ;         ; true
+                                     ; ean:$indexedType         ; DEFAULT:$indexedType ; ; true ; 80  ; true ; 70 ;      ;    ;      ;         ; true
+
+# Facet display in results
+                                     ; category:$indexedType    ; DEFAULT:$indexedType ; true ; ; ; ; ; ; ; ; ; true
+                                     ; brand:$indexedType       ; DEFAULT:$indexedType ; true ; ; ; ; ; ; ; ; ; true
+                                     ; price:$indexedType       ; DEFAULT:$indexedType ; true ; ; ; ; ; ; ; ; ; true
+                                     ; inStockFlag:$indexedType ; DEFAULT:$indexedType ; true ; ; ; ; ; ; ; ; ; true
+
+# Sort options
+INSERT_UPDATE SolrSort; indexedType(identifier)[unique=true]; code[unique=true]; useBoost; name[lang=en]
+                      ; $indexedType ; relevance    ; true  ; Relevance
+                      ; $indexedType ; name-asc     ; false ; Name (A-Z)
+                      ; $indexedType ; name-desc    ; false ; Name (Z-A)
+                      ; $indexedType ; price-asc    ; false ; Price (Low to High)
+                      ; $indexedType ; price-desc   ; false ; Price (High to Low)
+
+INSERT_UPDATE SolrSortField; sort(indexedType(identifier), code)[unique=true]; fieldName[unique=true]; ascending
+                           ; $indexedType:name-asc   ; name-sort  ; true
+                           ; $indexedType:name-desc  ; name-sort  ; false
+                           ; $indexedType:price-asc  ; price-sort ; true
+                           ; $indexedType:price-desc ; price-sort ; false
+
+# -----------------------------------------------
+# 6. Indexer CronJobs
+# -----------------------------------------------
+
+# Full indexer (nightly rebuild)
+INSERT_UPDATE SolrIndexerCronJob; code[unique=true]             ; job(code)      ; facetSearchConfig(name); indexerOperation(code); sessionLanguage(isocode); singleExecutable
+                                ; myStoreFullIndexerCronJob     ; solrIndexerJob  ; $searchConfig          ; full                 ; en                     ; true
+
+# Update indexer (incremental, every 5 minutes)
+INSERT_UPDATE SolrIndexerCronJob; code[unique=true]             ; job(code)      ; facetSearchConfig(name); indexerOperation(code); sessionLanguage(isocode); singleExecutable
+                                ; myStoreUpdateIndexerCronJob   ; solrIndexerJob  ; $searchConfig          ; update               ; en                     ; true
+
+INSERT_UPDATE Trigger; cronJob(code)[unique=true]     ; cronExpression  ; active
+                     ; myStoreFullIndexerCronJob       ; 0 0 3 * * ?     ; true
+                     ; myStoreUpdateIndexerCronJob     ; 0 0/5 * * * ?   ; true

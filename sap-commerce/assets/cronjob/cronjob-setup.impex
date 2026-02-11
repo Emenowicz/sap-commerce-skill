@@ -1,0 +1,33 @@
+# CronJob Setup ImpEx
+# Registers jobs, creates CronJob instances, and configures triggers.
+
+# -----------------------------------------------
+# 1. Register ServicelayerJobs (link Spring beans)
+# -----------------------------------------------
+INSERT_UPDATE ServicelayerJob; code[unique=true]          ; springId
+                             ; customCleanupJob           ; customCleanupJobPerformable
+                             ; dataExportJob              ; dataExportJobPerformable
+
+# -----------------------------------------------
+# 2. Create CronJob instances
+# -----------------------------------------------
+
+# Simple CronJob (uses base CronJobModel)
+INSERT_UPDATE CronJob; code[unique=true]        ; job(code)          ; sessionLanguage(isocode); singleExecutable; logToDatabase; logToFile; requestAbortStep
+                     ; customCleanupCronJob     ; customCleanupJob   ; en                     ; true            ; true         ; false    ; true
+
+# Typed CronJob with custom parameters (uses DataExportCronJobModel)
+INSERT_UPDATE DataExportCronJob; code[unique=true]     ; job(code)      ; exportPath          ; maxRecords; exportFormat(code); sessionLanguage(isocode); singleExecutable; logToDatabase
+                               ; dailyDataExportCron   ; dataExportJob  ; /tmp/export/daily   ; 5000      ; CSV              ; en                     ; true            ; true
+
+# -----------------------------------------------
+# 3. Configure Triggers (schedules)
+# -----------------------------------------------
+
+# Cleanup job: runs daily at 2:00 AM
+INSERT_UPDATE Trigger; cronJob(code)[unique=true]; cronExpression  ; active
+                     ; customCleanupCronJob      ; 0 0 2 * * ?     ; true
+
+# Export job: runs daily at 4:00 AM
+INSERT_UPDATE Trigger; cronJob(code)[unique=true]; cronExpression  ; active
+                     ; dailyDataExportCron       ; 0 0 4 * * ?     ; true

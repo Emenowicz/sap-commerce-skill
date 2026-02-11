@@ -83,7 +83,7 @@ public class ProductWsDTO {
 Configure in `*-web-spring.xml`:
 ```xml
 <bean parent="fieldSetLevelMapping">
-    <property name="dtoClass" value="com.company.dto.ProductWsDTO"/>
+    <property name="dtoClass" value="com.example.dto.ProductWsDTO"/>
     <property name="levelMapping">
         <map>
             <entry key="BASIC" value="code,name"/>
@@ -314,7 +314,7 @@ public class CustomResourceController {
 ### Spring Configuration
 ```xml
 <bean id="customResourceController"
-      class="com.company.controllers.CustomResourceController">
+      class="com.example.controllers.CustomResourceController">
     <property name="customFacade" ref="customFacade"/>
     <property name="dataMapper" ref="dataMapper"/>
 </bean>
