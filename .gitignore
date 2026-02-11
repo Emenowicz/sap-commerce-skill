@@ -1,0 +1,28 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Temp files
+*.tmp
+*.log
+*.swp
+
+# Build artifacts
+*.skill
+
+# Claude Code local files
+.claude/

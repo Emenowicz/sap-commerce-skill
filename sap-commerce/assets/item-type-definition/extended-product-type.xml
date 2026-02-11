@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Extended Product Type Example
+    Demonstrates extending existing Product type with custom attributes
+-->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <!-- Define custom enum for product availability -->
+    <enumtypes>
+        <enumtype code="ProductAvailabilityStatus" autocreate="true" generate="true" dynamic="false">
+            <description>Product availability status</description>
+            <value code="IN_STOCK"/>
+            <value code="LOW_STOCK"/>
+            <value code="OUT_OF_STOCK"/>
+            <value code="DISCONTINUED"/>
+            <value code="PREORDER"/>
+        </enumtype>
+    </enumtypes>
+
+    <itemtypes>
+        <!--
+            Brand: Related item type for product brand
+        -->
+        <itemtype code="Brand" autocreate="true" generate="true">
+            <deployment table="Brands" typecode="10010"/>
+            <attributes>
+                <attribute qualifier="code" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="name" type="localized:java.lang.String">
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="logo" type="Media">
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <!--
+            CustomProduct: Extends the standard Product type
+            - Inherits all Product attributes (name, code, catalog, etc.)
+            - Adds custom attributes for business needs
+        -->
+        <itemtype code="CustomProduct"
+                  extends="Product"
+                  autocreate="true"
+                  generate="true"
+                  jaloclass="com.company.jalo.CustomProduct">
+
+            <!-- Separate table for custom attributes (joined inheritance) -->
+            <deployment table="CustomProducts" typecode="10002"/>
+
+            <attributes>
+                <!-- Localized attribute - supports multiple languages -->
+                <attribute qualifier="shortDescription" type="localized:java.lang.String">
+                    <description>Short product description (localized)</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Enum attribute - uses ProductAvailabilityStatus -->
+                <attribute qualifier="availabilityStatus" type="ProductAvailabilityStatus">
+                    <description>Current availability status</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("ProductAvailabilityStatus","IN_STOCK")</defaultvalue>
+                </attribute>
+
+                <!-- Reference to another item type -->
+                <attribute qualifier="brand" type="Brand">
+                    <description>Product brand</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Boolean for featured products -->
+                <attribute qualifier="featured" type="java.lang.Boolean">
+                    <description>Is this a featured product</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                </attribute>
+
+                <!-- Double for custom pricing field -->
+                <attribute qualifier="wholesalePrice" type="java.lang.Double">
+                    <description>Wholesale price (B2B)</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Dynamic attribute - computed at runtime -->
+                <attribute qualifier="displayName" type="java.lang.String">
+                    <description>Computed display name (brand + name)</description>
+                    <modifiers read="true" write="false" optional="true"/>
+                    <!-- Dynamic attributes use attributeHandler -->
+                    <persistence type="dynamic" attributeHandler="customProductDisplayNameHandler"/>
+                </attribute>
+            </attributes>
+
+            <indexes>
+                <index name="availabilityStatusIdx">
+                    <key attribute="availabilityStatus"/>
+                </index>
+                <index name="featuredIdx">
+                    <key attribute="featured"/>
+                </index>
+            </indexes>
+        </itemtype>
+    </itemtypes>
+</items>

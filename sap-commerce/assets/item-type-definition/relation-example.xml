@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Relation Examples
+    Demonstrates one-to-many and many-to-many relationships
+-->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <itemtypes>
+        <!-- Store item type for one-to-many example -->
+        <itemtype code="Store" autocreate="true" generate="true">
+            <deployment table="Stores" typecode="10020"/>
+            <attributes>
+                <attribute qualifier="code" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="name" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <!-- StoreEmployee for one-to-many relation -->
+        <itemtype code="StoreEmployee" autocreate="true" generate="true">
+            <deployment table="StoreEmployees" typecode="10021"/>
+            <attributes>
+                <attribute qualifier="employeeId" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="name" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <!-- store attribute created by relation -->
+            </attributes>
+        </itemtype>
+
+        <!-- ProductTag for many-to-many example -->
+        <itemtype code="ProductTag" autocreate="true" generate="true">
+            <deployment table="ProductTags" typecode="10022"/>
+            <attributes>
+                <attribute qualifier="code" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="name" type="localized:java.lang.String">
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemtypes>
+
+    <relations>
+        <!--
+            One-to-Many Relation: Store to StoreEmployee
+            - One Store has many StoreEmployees
+            - Each StoreEmployee belongs to one Store
+            - partof="true" means employees are deleted with store
+        -->
+        <relation code="Store2StoreEmployee" localized="false" autocreate="true">
+            <description>Store to Employee relationship</description>
+
+            <!-- Source: Store (the "one" side) -->
+            <sourceElement type="Store"
+                          qualifier="employees"
+                          cardinality="many"
+                          collectiontype="list"
+                          ordered="true">
+                <description>Employees working at this store</description>
+                <modifiers read="true" write="true" optional="true" partof="true"/>
+            </sourceElement>
+
+            <!-- Target: StoreEmployee (the "many" side) -->
+            <targetElement type="StoreEmployee"
+                          qualifier="store"
+                          cardinality="one">
+                <description>Store where employee works</description>
+                <modifiers read="true" write="true" optional="false"/>
+            </targetElement>
+        </relation>
+
+        <!--
+            Many-to-Many Relation: Product to ProductTag
+            - Products can have multiple tags
+            - Tags can be assigned to multiple products
+            - Requires deployment table for link records
+        -->
+        <relation code="Product2ProductTag" localized="false" autocreate="true">
+            <description>Product to Tag many-to-many relationship</description>
+
+            <!-- Deployment creates a link table -->
+            <deployment table="Prod2Tag" typecode="10100"/>
+
+            <!-- Source: Product -->
+            <sourceElement type="Product"
+                          qualifier="tags"
+                          cardinality="many"
+                          collectiontype="set">
+                <description>Tags assigned to this product</description>
+                <modifiers read="true" write="true" optional="true"/>
+            </sourceElement>
+
+            <!-- Target: ProductTag -->
+            <targetElement type="ProductTag"
+                          qualifier="products"
+                          cardinality="many"
+                          collectiontype="set">
+                <description>Products with this tag</description>
+                <modifiers read="true" write="true" optional="true"/>
+            </targetElement>
+        </relation>
+
+        <!--
+            Self-Referencing Relation: Employee Hierarchy
+            - Employee can have a manager (another Employee)
+            - Employee can have direct reports
+        -->
+        <relation code="Employee2Manager" localized="false" autocreate="true">
+            <description>Employee manager hierarchy</description>
+
+            <sourceElement type="StoreEmployee"
+                          qualifier="directReports"
+                          cardinality="many"
+                          collectiontype="set">
+                <description>Employees reporting to this manager</description>
+                <modifiers read="true" write="true" optional="true"/>
+            </sourceElement>
+
+            <targetElement type="StoreEmployee"
+                          qualifier="manager"
+                          cardinality="one">
+                <description>Manager of this employee</description>
+                <modifiers read="true" write="true" optional="true"/>
+            </targetElement>
+        </relation>
+    </relations>
+</items>

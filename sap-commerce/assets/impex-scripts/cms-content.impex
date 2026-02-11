@@ -1,0 +1,52 @@
+# cms-content.impex
+# Create CMS pages, slots, and components
+
+$contentCatalog=electronicsContentCatalog
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default=$contentCatalog]),CatalogVersion.version[default='Online'])[unique=true]
+$lang=en
+
+# Page Templates
+INSERT_UPDATE PageTemplate;uid[unique=true];name;$contentCV;frontendTemplateName;active[default=true]
+;LandingPageTemplate;Landing Page Template;;layout/landingLayout1Page
+;ContentPageTemplate;Content Page Template;;layout/contentLayout1Page
+;ProductListPageTemplate;Product List Page Template;;layout/productListPage
+
+# Content Slots
+INSERT_UPDATE ContentSlot;uid[unique=true];name;$contentCV;active[default=true]
+;HeaderSlot;Header Slot;
+;FooterSlot;Footer Slot;
+;SidebarSlot;Sidebar Slot;
+;MainContentSlot;Main Content Slot;
+;BannerSlot;Banner Slot;
+
+# Content Slot for Templates
+INSERT_UPDATE ContentSlotForTemplate;uid[unique=true];$contentCV;pageTemplate(uid,$contentCV);contentSlot(uid,$contentCV);position[unique=true];allowOverwrite
+;HeaderSlot-LandingPage;;LandingPageTemplate;HeaderSlot;Header;true
+;FooterSlot-LandingPage;;LandingPageTemplate;FooterSlot;Footer;true
+;MainContentSlot-LandingPage;;LandingPageTemplate;MainContentSlot;Section1;true
+
+# CMS Pages
+INSERT_UPDATE ContentPage;uid[unique=true];name;$contentCV;masterTemplate(uid,$contentCV);defaultPage[default=true];approvalStatus(code)[default='approved'];homepage[default=false]
+;homepage;Homepage;;LandingPageTemplate;true;;true
+;faq;FAQ Page;;ContentPageTemplate
+;aboutus;About Us;;ContentPageTemplate
+;contact;Contact Us;;ContentPageTemplate
+
+# CMS Paragraph Components
+INSERT_UPDATE CMSParagraphComponent;uid[unique=true];name;$contentCV;content[lang=$lang]
+;WelcomeParagraph;Welcome Text;;"<h1>Welcome to Our Store</h1><p>Discover amazing products at great prices.</p>"
+;FAQContent;FAQ Content;;"<h2>Frequently Asked Questions</h2><p>Find answers to common questions.</p>"
+;AboutUsContent;About Us Content;;"<h2>About Us</h2><p>We are a leading e-commerce company.</p>"
+
+# Banner Components
+INSERT_UPDATE SimpleBannerComponent;uid[unique=true];name;$contentCV;urlLink
+;HomeBanner;Homepage Banner;;/electronics
+;SaleBanner;Sale Banner;;/sale
+
+# Add components to slots
+INSERT_UPDATE ContentSlotForPage;uid[unique=true];$contentCV;page(uid,$contentCV);contentSlot(uid,$contentCV);position
+;MainContentSlot-Homepage;;homepage;MainContentSlot;Section1
+
+INSERT_UPDATE ElementsForSlot;source(uid,$contentCV)[unique=true];target(uid,$contentCV)[unique=true];sequenceNumber
+;MainContentSlot;WelcomeParagraph;1
+;MainContentSlot;HomeBanner;2

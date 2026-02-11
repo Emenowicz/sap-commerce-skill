@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Simple Item Type Example
+    Demonstrates basic item type with primitive attributes
+-->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <itemtypes>
+        <!--
+            CustomerFeedback: A simple item type demonstrating primitive attributes
+            - Unique code identifier
+            - String, Integer, Date, Boolean attributes
+            - Optional and required fields
+        -->
+        <itemtype code="CustomerFeedback"
+                  autocreate="true"
+                  generate="true"
+                  jaloclass="com.company.jalo.CustomerFeedback">
+
+            <!-- Database deployment configuration -->
+            <!-- typecode must be unique (10000-32767 for custom types) -->
+            <deployment table="CustomerFeedbacks" typecode="10001"/>
+
+            <attributes>
+                <!-- Unique identifier - required, searchable -->
+                <attribute qualifier="code" type="java.lang.String">
+                    <description>Unique feedback code</description>
+                    <modifiers read="true" write="true" optional="false" unique="true" search="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- String attribute - customer name -->
+                <attribute qualifier="customerName" type="java.lang.String">
+                    <description>Name of the customer</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Integer attribute - rating score -->
+                <attribute qualifier="rating" type="java.lang.Integer">
+                    <description>Rating from 1 to 5</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Integer.valueOf(3)</defaultvalue>
+                </attribute>
+
+                <!-- Date attribute - submission date -->
+                <attribute qualifier="submissionDate" type="java.util.Date">
+                    <description>Date feedback was submitted</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Boolean attribute - verified flag -->
+                <attribute qualifier="verified" type="java.lang.Boolean">
+                    <description>Whether feedback has been verified</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Boolean.FALSE</defaultvalue>
+                </attribute>
+
+                <!-- Long text attribute - feedback comment -->
+                <attribute qualifier="comment" type="java.lang.String">
+                    <description>Detailed feedback comment</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <!-- Use big column type for long text -->
+                    <persistence type="property">
+                        <columntype database="oracle">
+                            <value>CLOB</value>
+                        </columntype>
+                        <columntype database="mysql">
+                            <value>TEXT</value>
+                        </columntype>
+                        <columntype>
+                            <value>HYBRIS.LONG_STRING</value>
+                        </columntype>
+                    </persistence>
+                </attribute>
+            </attributes>
+
+            <!-- Define indexes for frequently queried attributes -->
+            <indexes>
+                <index name="customerNameIdx">
+                    <key attribute="customerName"/>
+                </index>
+                <index name="ratingIdx">
+                    <key attribute="rating"/>
+                </index>
+            </indexes>
+        </itemtype>
+    </itemtypes>
+</items>

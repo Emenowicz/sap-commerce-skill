@@ -1,0 +1,80 @@
+-- order-queries.fxs
+-- Common FlexibleSearch queries for Order and Cart operations
+
+-- Find order by code
+SELECT {pk} FROM {Order} WHERE {code} = ?orderCode
+
+-- Orders for specific user
+SELECT {pk} FROM {Order}
+WHERE {user} = ?user
+ORDER BY {creationtime} DESC
+
+-- Orders by status
+SELECT {pk} FROM {Order}
+WHERE {status} = ?status
+ORDER BY {creationtime} DESC
+
+-- Orders in date range
+SELECT {pk} FROM {Order}
+WHERE {creationtime} >= ?startDate
+      AND {creationtime} <= ?endDate
+ORDER BY {creationtime} DESC
+
+-- Recent orders (last N days)
+SELECT {pk} FROM {Order}
+WHERE {creationtime} >= ?sinceDate
+ORDER BY {creationtime} DESC
+
+-- Order entries for order
+SELECT {pk} FROM {OrderEntry}
+WHERE {order} = ?order
+ORDER BY {entryNumber} ASC
+
+-- Orders containing specific product
+SELECT DISTINCT {o.pk} FROM {Order AS o
+      JOIN OrderEntry AS oe ON {oe.order} = {o.pk}}
+WHERE {oe.product} = ?product
+
+-- Orders by total value
+SELECT {pk} FROM {Order}
+WHERE {totalPrice} >= ?minTotal
+      AND {totalPrice} <= ?maxTotal
+ORDER BY {totalPrice} DESC
+
+-- Cart for user
+SELECT {pk} FROM {Cart}
+WHERE {user} = ?user
+      AND {saveTime} IS NULL
+ORDER BY {modifiedtime} DESC
+
+-- Abandoned carts (not modified in X days)
+SELECT {pk} FROM {Cart}
+WHERE {modifiedtime} < ?abandonedBefore
+      AND {saveTime} IS NULL
+
+-- Cart entries
+SELECT {ce.pk}, {ce.quantity}, {p.code}
+FROM {CartEntry AS ce
+      JOIN Cart AS c ON {ce.order} = {c.pk}
+      JOIN Product AS p ON {ce.product} = {p.pk}}
+WHERE {c.code} = ?cartCode
+
+-- Order count by status
+SELECT {status}, COUNT({pk})
+FROM {Order}
+GROUP BY {status}
+
+-- Daily order totals
+SELECT DATE({creationtime}), SUM({totalPrice})
+FROM {Order}
+WHERE {creationtime} >= ?startDate
+GROUP BY DATE({creationtime})
+ORDER BY DATE({creationtime})
+
+-- Orders pending fulfillment
+SELECT {o.pk} FROM {Order AS o}
+WHERE {o.status} = 'CREATED'
+      AND NOT EXISTS (
+          SELECT 1 FROM {Consignment AS c}
+          WHERE {c.order} = {o.pk}
+      )

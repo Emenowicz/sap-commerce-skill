@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    customextension-spring.xml
+    Spring bean configuration for this extension.
+    Define DAOs, services, facades, converters here.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Component scan for annotations -->
+    <context:component-scan base-package="com.company.custom"/>
+
+    <!-- DAO Beans -->
+    <alias name="defaultCustomItemDAO" alias="customItemDAO"/>
+    <bean id="defaultCustomItemDAO" class="com.company.custom.daos.impl.DefaultCustomItemDAO">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <!-- Service Beans -->
+    <alias name="defaultCustomItemService" alias="customItemService"/>
+    <bean id="defaultCustomItemService" class="com.company.custom.services.impl.DefaultCustomItemService">
+        <property name="customItemDAO" ref="customItemDAO"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+    <!-- Populator Beans -->
+    <bean id="customItemPopulator" class="com.company.custom.populators.CustomItemPopulator"/>
+
+    <!-- Converter Beans -->
+    <alias name="defaultCustomItemConverter" alias="customItemConverter"/>
+    <bean id="defaultCustomItemConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.company.custom.data.CustomItemData"/>
+        <property name="populators">
+            <list>
+                <ref bean="customItemPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Facade Beans -->
+    <alias name="defaultCustomItemFacade" alias="customItemFacade"/>
+    <bean id="defaultCustomItemFacade" class="com.company.custom.facades.impl.DefaultCustomItemFacade">
+        <property name="customItemService" ref="customItemService"/>
+        <property name="customItemConverter" ref="customItemConverter"/>
+    </bean>
+
+    <!-- System Setup -->
+    <bean id="customextensionSystemSetup" class="com.company.custom.setup.CustomextensionSystemSetup">
+        <property name="modelService" ref="modelService"/>
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+</beans>

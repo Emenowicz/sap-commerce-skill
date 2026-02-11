@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    customextension-items.xml
+    Type system definitions for this extension.
+    Define item types, relations, enums here.
+-->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <!-- Enumeration types -->
+    <enumtypes>
+        <enumtype code="CustomStatus" autocreate="true" generate="true" dynamic="false">
+            <description>Custom status enumeration</description>
+            <value code="ACTIVE"/>
+            <value code="INACTIVE"/>
+            <value code="PENDING"/>
+        </enumtype>
+    </enumtypes>
+
+    <!-- Item types -->
+    <itemtypes>
+
+        <!-- Custom item type example -->
+        <itemtype code="CustomItem"
+                  autocreate="true"
+                  generate="true"
+                  jaloclass="com.company.custom.jalo.CustomItem">
+
+            <deployment table="CustomItems" typecode="10500"/>
+
+            <attributes>
+                <attribute qualifier="code" type="java.lang.String">
+                    <description>Unique code</description>
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <attribute qualifier="name" type="localized:java.lang.String">
+                    <description>Localized name</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <attribute qualifier="status" type="CustomStatus">
+                    <description>Current status</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("CustomStatus","ACTIVE")</defaultvalue>
+                </attribute>
+
+                <attribute qualifier="active" type="java.lang.Boolean">
+                    <description>Is active flag</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                    <defaultvalue>Boolean.TRUE</defaultvalue>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+        <!-- Extend existing Product type -->
+        <itemtype code="Product" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="customField" type="java.lang.String">
+                    <description>Custom field added to Product</description>
+                    <modifiers read="true" write="true" optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+    </itemtypes>
+</items>

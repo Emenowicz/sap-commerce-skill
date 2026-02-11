@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    occ-extension-spring.xml
+    Spring configuration for OCC extension beans.
+    Place in resources/ directory of your OCC extension.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- ================================ -->
+    <!-- POPULATORS                       -->
+    <!-- ================================ -->
+
+    <bean id="customProductPopulator"
+          class="com.company.populators.CustomProductPopulator"/>
+
+    <bean id="customProductPricePopulator"
+          class="com.company.populators.CustomProductPricePopulator">
+        <property name="priceDataFactory" ref="priceDataFactory"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <bean id="customProductImagePopulator"
+          class="com.company.populators.CustomProductImagePopulator">
+        <property name="imageConverter" ref="imageConverter"/>
+    </bean>
+
+    <!-- ================================ -->
+    <!-- CONVERTERS                       -->
+    <!-- ================================ -->
+
+    <!-- Basic converter - minimal fields -->
+    <alias name="defaultBasicCustomProductConverter" alias="basicCustomProductConverter"/>
+    <bean id="defaultBasicCustomProductConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="populators">
+            <list>
+                <ref bean="customProductPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Full converter - all fields -->
+    <alias name="defaultCustomProductConverter" alias="customProductConverter"/>
+    <bean id="defaultCustomProductConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="populators">
+            <list>
+                <ref bean="customProductPopulator"/>
+                <ref bean="customProductPricePopulator"/>
+                <ref bean="customProductImagePopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- ================================ -->
+    <!-- FIELD LEVEL MAPPING              -->
+    <!-- ================================ -->
+
+    <!-- Define which fields to include at each level -->
+    <bean parent="fieldSetLevelMapping">
+        <property name="dtoClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="code,name"/>
+                <entry key="DEFAULT" value="code,name,description,price,stockStatus,purchasable"/>
+                <entry key="FULL" value="code,name,description,summary,url,price,stockStatus,stockLevel,purchasable,images,imageUrl,categoryCode,categoryName,brandName,averageRating,numberOfReviews,customField,customStatus"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- List DTO field mapping -->
+    <bean parent="fieldSetLevelMapping">
+        <property name="dtoClass" value="com.company.dto.CustomProductListWsDTO"/>
+        <property name="levelMapping">
+            <map>
+                <entry key="BASIC" value="products(BASIC),totalCount"/>
+                <entry key="DEFAULT" value="products(DEFAULT),totalCount"/>
+                <entry key="FULL" value="products(FULL),totalCount"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- ================================ -->
+    <!-- CONTROLLERS                      -->
+    <!-- ================================ -->
+
+    <bean id="customProductController"
+          class="com.company.controllers.CustomProductController">
+        <property name="customProductFacade" ref="customProductFacade"/>
+        <property name="dataMapper" ref="dataMapper"/>
+    </bean>
+
+    <!-- ================================ -->
+    <!-- VALIDATORS                       -->
+    <!-- ================================ -->
+
+    <bean id="customProductValidator"
+          class="com.company.validators.CustomProductValidator"/>
+
+    <!-- ================================ -->
+    <!-- EXCEPTION HANDLERS               -->
+    <!-- ================================ -->
+
+    <!-- Add custom exception handling -->
+    <bean id="customExceptionHandler"
+          class="com.company.handlers.CustomExceptionHandler"/>
+
+</beans>

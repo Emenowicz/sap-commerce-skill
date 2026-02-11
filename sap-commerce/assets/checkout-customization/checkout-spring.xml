@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    checkout-spring.xml
+    Spring configuration for custom checkout beans.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Custom Checkout Facade -->
+    <alias name="defaultCustomCheckoutFacade" alias="customCheckoutFacade"/>
+    <bean id="defaultCustomCheckoutFacade"
+          class="com.company.facades.impl.DefaultCustomCheckoutFacade">
+        <property name="cartService" ref="cartService"/>
+        <property name="modelService" ref="modelService"/>
+        <property name="customOptionService" ref="customOptionService"/>
+    </bean>
+
+    <!-- Custom Checkout Step Controller -->
+    <bean id="customCheckoutStepController"
+          class="com.company.storefront.controllers.pages.checkout.steps.CustomCheckoutStepController">
+        <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
+    </bean>
+
+    <!-- Checkout Step Configuration -->
+    <bean id="customCheckoutStep"
+          class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutStep">
+        <property name="checkoutGroup" ref="defaultCheckoutGroup"/>
+        <property name="checkoutStepValidator" ref="deliveryMethodCheckoutStepValidator"/>
+        <property name="transitions">
+            <map>
+                <entry key="previous" value="redirect:/checkout/multi/delivery-method"/>
+                <entry key="next" value="redirect:/checkout/multi/payment-method"/>
+            </map>
+        </property>
+        <property name="progressBarId" value="customStep"/>
+    </bean>
+
+    <!-- Register custom step in checkout group -->
+    <bean id="customCheckoutGroupConfiguration"
+          class="org.springframework.beans.factory.config.MethodInvokingBean">
+        <property name="targetObject" ref="defaultCheckoutGroup"/>
+        <property name="targetMethod" value="setCheckoutStepMap"/>
+        <property name="arguments">
+            <map merge="true">
+                <entry key="custom-step" value-ref="customCheckoutStep"/>
+            </map>
+        </property>
+    </bean>
+
+    <!-- Progress Bar Configuration -->
+    <bean id="customStepProgressBar"
+          class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutProgressBar">
+        <property name="id" value="customStep"/>
+        <property name="label" value="checkout.multi.customStep.title"/>
+    </bean>
+
+    <!-- Step Validator -->
+    <bean id="customCheckoutStepValidator"
+          class="com.company.storefront.validators.CustomCheckoutStepValidator">
+        <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
+    </bean>
+
+    <!-- Form Validator -->
+    <bean id="customStepFormValidator"
+          class="com.company.storefront.validators.CustomStepFormValidator"/>
+
+</beans>

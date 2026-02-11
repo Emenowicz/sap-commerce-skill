@@ -1,0 +1,61 @@
+-- product-queries.fxs
+-- Common FlexibleSearch queries for Product operations
+
+-- Find product by code
+SELECT {pk} FROM {Product} WHERE {code} = ?code
+
+-- Find product by code in specific catalog version
+SELECT {p.pk} FROM {Product AS p
+      JOIN CatalogVersion AS cv ON {p.catalogVersion} = {cv.pk}
+      JOIN Catalog AS c ON {cv.catalog} = {c.pk}}
+WHERE {p.code} = ?code
+      AND {c.id} = ?catalogId
+      AND {cv.version} = ?versionName
+
+-- Search products by name (case-insensitive)
+SELECT {pk} FROM {Product}
+WHERE LOWER({name}) LIKE LOWER(?searchText)
+ORDER BY {name} ASC
+
+-- Products in category (via relation)
+SELECT {p.pk} FROM {Product AS p
+      JOIN CategoryProductRelation AS cpr ON {p.pk} = {cpr.target}
+      JOIN Category AS c ON {cpr.source} = {c.pk}}
+WHERE {c.code} = ?categoryCode
+
+-- Products with price in range
+SELECT DISTINCT {p.pk} FROM {Product AS p
+      JOIN PriceRow AS pr ON {p.pk} = {pr.product}}
+WHERE {pr.price} >= ?minPrice
+      AND {pr.price} <= ?maxPrice
+      AND {pr.currency} = ?currency
+
+-- Products by approval status
+SELECT {pk} FROM {Product}
+WHERE {approvalStatus} = ?status
+      AND {catalogVersion} = ?catalogVersion
+
+-- Recently modified products
+SELECT {pk} FROM {Product}
+WHERE {modifiedtime} >= ?since
+ORDER BY {modifiedtime} DESC
+
+-- Products without images
+SELECT {p.pk} FROM {Product AS p}
+WHERE NOT EXISTS (
+    SELECT 1 FROM {MediaContainer AS mc}
+    WHERE {mc.pk} IN ({p.galleryImages})
+)
+
+-- Featured/promoted products
+SELECT {pk} FROM {Product}
+WHERE {featured} = true
+      AND {approvalStatus} = 'approved'
+ORDER BY {priority} DESC
+
+-- Products count by category
+SELECT {c.code}, COUNT({p.pk})
+FROM {Product AS p
+      JOIN CategoryProductRelation AS cpr ON {p.pk} = {cpr.target}
+      JOIN Category AS c ON {cpr.source} = {c.pk}}
+GROUP BY {c.code}

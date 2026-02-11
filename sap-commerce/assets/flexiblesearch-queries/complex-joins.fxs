@@ -1,0 +1,97 @@
+-- complex-joins.fxs
+-- Advanced FlexibleSearch queries with complex JOINs and subqueries
+
+-- Products with stock levels across warehouses
+SELECT {p.pk}, {p.code}, {w.code}, {sl.available}
+FROM {Product AS p
+      JOIN StockLevel AS sl ON {p.pk} = {sl.product}
+      JOIN Warehouse AS w ON {sl.warehouse} = {w.pk}}
+WHERE {sl.available} > 0
+ORDER BY {p.code}, {w.code}
+
+-- Products with all their categories (multi-level)
+SELECT {p.pk}, {p.code}, {c1.code} AS directCategory, {c2.code} AS parentCategory
+FROM {Product AS p
+      JOIN CategoryProductRelation AS cpr ON {p.pk} = {cpr.target}
+      JOIN Category AS c1 ON {cpr.source} = {c1.pk}
+      LEFT JOIN Category AS c2 ON {c1.supercategories} = {c2.pk}}
+WHERE {p.catalogVersion} = ?catalogVersion
+
+-- Orders with customer and address details
+SELECT {o.pk}, {o.code}, {c.name}, {a.streetname}, {a.town}
+FROM {Order AS o
+      JOIN Customer AS c ON {o.user} = {c.pk}
+      JOIN Address AS a ON {o.deliveryAddress} = {a.pk}}
+WHERE {o.creationtime} >= ?startDate
+ORDER BY {o.creationtime} DESC
+
+-- Full product catalog with prices and stock
+SELECT {p.pk}, {p.code}, {p.name}, {pr.price}, {pr.currency}, {sl.available}
+FROM {Product AS p
+      LEFT JOIN PriceRow AS pr ON {p.pk} = {pr.product}
+      LEFT JOIN StockLevel AS sl ON {p.pk} = {sl.product}}
+WHERE {p.catalogVersion} = ?catalogVersion
+      AND ({pr.currency} = ?currency OR {pr.currency} IS NULL)
+ORDER BY {p.code}
+
+-- B2B organization structure with users
+SELECT {u.pk}, {u.uid}, {u.name}, {unit.uid} AS unitName, {parent.uid} AS parentUnit
+FROM {B2BUnit AS unit
+      JOIN B2BCustomer AS u ON {u.defaultB2BUnit} = {unit.pk}
+      LEFT JOIN B2BUnit AS parent ON {unit.parentUnit} = {parent.pk}}
+ORDER BY {parent.uid}, {unit.uid}, {u.name}
+
+-- Products in multiple categories (intersection)
+SELECT {p.pk} FROM {Product AS p}
+WHERE EXISTS (
+    SELECT 1 FROM {CategoryProductRelation AS cpr
+          JOIN Category AS c ON {cpr.source} = {c.pk}}
+    WHERE {cpr.target} = {p.pk} AND {c.code} = ?category1
+)
+AND EXISTS (
+    SELECT 1 FROM {CategoryProductRelation AS cpr
+          JOIN Category AS c ON {cpr.source} = {c.pk}}
+    WHERE {cpr.target} = {p.pk} AND {c.code} = ?category2
+)
+
+-- Order history with items summary
+SELECT {o.pk}, {o.code}, {o.creationtime}, {o.totalPrice},
+       COUNT({oe.pk}) AS itemCount, SUM({oe.quantity}) AS totalQuantity
+FROM {Order AS o
+      JOIN OrderEntry AS oe ON {oe.order} = {o.pk}}
+WHERE {o.user} = ?user
+GROUP BY {o.pk}, {o.code}, {o.creationtime}, {o.totalPrice}
+ORDER BY {o.creationtime} DESC
+
+-- CMS pages with slots and components
+SELECT {p.pk}, {p.uid}, {cs.uid} AS slotUid, {comp.uid} AS componentUid
+FROM {ContentPage AS p
+      JOIN ContentSlotForPage AS csfp ON {csfp.page} = {p.pk}
+      JOIN ContentSlot AS cs ON {csfp.contentSlot} = {cs.pk}
+      JOIN ElementsForSlot AS efs ON {efs.source} = {cs.pk}
+      JOIN AbstractCMSComponent AS comp ON {efs.target} = {comp.pk}}
+WHERE {p.catalogVersion} = ?catalogVersion
+ORDER BY {p.uid}, {cs.position}
+
+-- Products never ordered
+SELECT {p.pk}, {p.code} FROM {Product AS p}
+WHERE {p.catalogVersion} = ?catalogVersion
+AND NOT EXISTS (
+    SELECT 1 FROM {OrderEntry AS oe} WHERE {oe.product} = {p.pk}
+)
+
+-- Top selling products
+SELECT {oe.product}, SUM({oe.quantity}) AS totalSold
+FROM {OrderEntry AS oe
+      JOIN Order AS o ON {oe.order} = {o.pk}}
+WHERE {o.creationtime} >= ?startDate
+GROUP BY {oe.product}
+ORDER BY totalSold DESC
+
+-- Products with promotions
+SELECT DISTINCT {p.pk}, {p.code}, {promo.code} AS promotionCode
+FROM {Product AS p
+      JOIN ProductPromotion AS promo ON {p.pk} IN ({promo.products})}
+WHERE {promo.enabled} = true
+      AND {promo.startDate} <= ?currentDate
+      AND ({promo.endDate} IS NULL OR {promo.endDate} >= ?currentDate)

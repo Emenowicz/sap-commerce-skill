@@ -1,0 +1,66 @@
+# b2b-organization.impex
+# Setup B2B organization structure with units, users, budgets, and approvals
+
+$defaultPassword=Test@123
+$lang=en
+
+# B2B Units (Organization Hierarchy)
+INSERT_UPDATE B2BUnit;uid[unique=true];name;locName[lang=$lang];description;active[default=true]
+;Acme Corp;Acme Corporation;Acme Corporation;Main corporate entity
+;Acme Sales;Acme Sales Division;Acme Sales Division;Sales department
+;Acme Engineering;Acme Engineering;Acme Engineering;Engineering department
+;Acme Finance;Acme Finance;Acme Finance;Finance department
+
+# Unit Hierarchy
+UPDATE B2BUnit;uid[unique=true];parentUnit(uid)
+;Acme Sales;Acme Corp
+;Acme Engineering;Acme Corp
+;Acme Finance;Acme Corp
+
+# B2B User Groups
+INSERT_UPDATE B2BUserGroup;uid[unique=true];name;unit(uid)
+;acmePurchasers;Acme Purchasers;Acme Corp
+;acmeApprovers;Acme Approvers;Acme Corp
+;acmeAdmins;Acme Administrators;Acme Corp
+
+# B2B Customers
+INSERT_UPDATE B2BCustomer;uid[unique=true];password[default=$defaultPassword];name;email;defaultB2BUnit(uid);groups(uid);active[default=true]
+;purchaser@acme.com;;John Purchaser;purchaser@acme.com;Acme Sales;acmePurchasers,b2bcustomergroup
+;approver@acme.com;;Jane Approver;approver@acme.com;Acme Corp;acmeApprovers,b2bapprovergroup
+;admin@acme.com;;Bob Admin;admin@acme.com;Acme Corp;acmeAdmins,b2badmingroup
+;engineer@acme.com;;Alice Engineer;engineer@acme.com;Acme Engineering;acmePurchasers,b2bcustomergroup
+
+# Cost Centers
+INSERT_UPDATE B2BCostCenter;code[unique=true];name;unit(uid);currency(isocode)[default='USD'];active[default=true]
+;ACME_CC_001;Sales Cost Center;Acme Sales
+;ACME_CC_002;Engineering Cost Center;Acme Engineering
+;ACME_CC_003;Corporate Cost Center;Acme Corp
+
+# Budgets
+INSERT_UPDATE B2BBudget;code[unique=true];name;unit(uid);budget;currency(isocode)[default='USD'];dateRange(code);active[default=true]
+;ACME_BUDGET_001;Sales Budget 2024;Acme Sales;50000.00;;
+;ACME_BUDGET_002;Engineering Budget 2024;Acme Engineering;100000.00;;
+;ACME_BUDGET_003;Corporate Budget 2024;Acme Corp;500000.00;;
+
+# Assign Budgets to Cost Centers
+UPDATE B2BCostCenter;code[unique=true];budgets(code)
+;ACME_CC_001;ACME_BUDGET_001
+;ACME_CC_002;ACME_BUDGET_002
+;ACME_CC_003;ACME_BUDGET_003
+
+# Order Approval Permissions
+INSERT_UPDATE B2BOrderThresholdPermission;code[unique=true];unit(uid);threshold;currency(isocode)[default='USD']
+;ACME_5K_ORDER;Acme Corp;5000.00
+;ACME_10K_ORDER;Acme Corp;10000.00
+;ACME_50K_ORDER;Acme Corp;50000.00
+
+# Assign Permissions to Groups
+UPDATE B2BUserGroup;uid[unique=true];permissions(code)
+;acmePurchasers;ACME_5K_ORDER
+;acmeApprovers;ACME_10K_ORDER,ACME_50K_ORDER
+
+# Customer Addresses
+INSERT_UPDATE Address;owner(B2BCustomer.uid)[unique=true];streetname;streetnumber;postalcode;town;country(isocode);company;department;shippingAddress[default=true];billingAddress[default=true]
+;purchaser@acme.com;Industrial Blvd;1000;12345;Business City;US;Acme Corp;Sales
+;approver@acme.com;Industrial Blvd;1000;12345;Business City;US;Acme Corp;Management
+;admin@acme.com;Industrial Blvd;1000;12345;Business City;US;Acme Corp;Administration

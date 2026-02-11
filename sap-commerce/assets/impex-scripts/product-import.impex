@@ -1,0 +1,57 @@
+# product-import.impex
+# Import products with categories, prices, and media
+
+# Macros
+$productCatalog=electronicsProductCatalog
+$productCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Online'])[unique=true]
+$supercategories=supercategories(code,catalogVersion(catalog(id[default=$productCatalog]),version[default='Online']))
+$prices=@priceRow[translator=de.hybris.platform.impex.jalo.translators.ItemPKTranslator]
+$approved=approvalStatus(code)[default='approved']
+$lang=en
+
+# Create Categories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];allowedPrincipals(uid)[default='customergroup']
+;electronics;;Electronics
+;computers;;Computers
+;phones;;Phones
+
+# Create Products
+INSERT_UPDATE Product;code[unique=true];$productCV;name[lang=$lang];description[lang=$lang];$supercategories;$approved;unit(code)[default='pieces']
+;LAPTOP001;;Gaming Laptop;High-performance gaming laptop with RTX graphics;computers
+;LAPTOP002;;Business Laptop;Professional laptop for work;computers
+;PHONE001;;Smartphone Pro;Latest smartphone with advanced camera;phones
+;PHONE002;;Budget Phone;Affordable smartphone;phones
+
+# Create Price Rows
+$currency=currency(isocode)[default='USD']
+INSERT_UPDATE PriceRow;product(code,$productCV)[unique=true];$currency;price;unit(code)[default='pieces'];net[default=false]
+;LAPTOP001;;1299.99
+;LAPTOP002;;899.99
+;PHONE001;;999.99
+;PHONE002;;299.99
+
+# Create Stock Levels
+$warehouse=warehouse(code)[default='default']
+INSERT_UPDATE StockLevel;productCode[unique=true];$warehouse;available;inStockStatus(code)[default='forceInStock']
+;LAPTOP001;;50
+;LAPTOP002;;100
+;PHONE001;;200
+;PHONE002;;500
+
+# Create Media
+$mediaCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Online'])
+$thumbnail=thumbnail(code,$mediaCV)
+$picture=picture(code,$mediaCV)
+
+INSERT_UPDATE Media;code[unique=true];$mediaCV;mime[default='image/jpeg'];folder(qualifier)[default='images']
+;laptop001_image;;
+;laptop002_image;;
+;phone001_image;;
+;phone002_image;;
+
+# Assign media to products
+UPDATE Product;code[unique=true];$productCV;$thumbnail;$picture
+;LAPTOP001;;laptop001_image;laptop001_image
+;LAPTOP002;;laptop002_image;laptop002_image
+;PHONE001;;phone001_image;phone001_image
+;PHONE002;;phone002_image;phone002_image

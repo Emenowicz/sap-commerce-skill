@@ -1,0 +1,45 @@
+# user-setup.impex
+# Setup users, user groups, and permissions
+
+$defaultPassword=Test@123
+
+# Create Customer Groups
+INSERT_UPDATE CustomerGroup;uid[unique=true];locname[lang=en];description
+;regularCustomers;Regular Customers;Standard customer group
+;goldCustomers;Gold Customers;Premium customers with benefits
+;platinumCustomers;Platinum Customers;VIP customers
+
+# Setup group hierarchy
+UPDATE CustomerGroup;uid[unique=true];groups(uid)
+;goldCustomers;customergroup
+;platinumCustomers;customergroup
+;regularCustomers;customergroup
+
+# Create Sample Customers
+INSERT_UPDATE Customer;uid[unique=true];password[default=$defaultPassword];name;groups(uid);sessionLanguage(isocode)[default='en'];sessionCurrency(isocode)[default='USD']
+;john.doe@example.com;;John Doe;regularCustomers
+;jane.smith@example.com;;Jane Smith;goldCustomers
+;bob.premium@example.com;;Bob Premium;platinumCustomers
+
+# Create Customer Addresses
+INSERT_UPDATE Address;owner(Customer.uid)[unique=true];streetname;streetnumber;postalcode;town;country(isocode);shippingAddress[default=true];billingAddress[default=true]
+;john.doe@example.com;Main Street;123;10001;New York;US
+;jane.smith@example.com;Oak Avenue;456;90210;Beverly Hills;US
+;bob.premium@example.com;Park Lane;789;SW1A 1AA;London;GB
+
+# Create Employee Users
+INSERT_UPDATE Employee;uid[unique=true];password[default=$defaultPassword];name;groups(uid)
+;admin@company.com;;Admin User;admingroup
+;manager@company.com;;Store Manager;employeegroup
+;support@company.com;;Support Staff;employeegroup
+
+# Create User Rights (optional)
+INSERT_UPDATE UserRight;code[unique=true];itemtype(code);attribute;positive
+;read_products;Product;;true
+;read_orders;Order;;true
+;write_orders;Order;;true
+
+# Assign rights to groups
+INSERT_UPDATE PrincipalGroupRelation;source(uid)[unique=true];target(uid)[unique=true]
+;goldCustomers;customergroup
+;platinumCustomers;goldCustomers
