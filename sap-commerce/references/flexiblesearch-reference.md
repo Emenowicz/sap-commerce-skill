@@ -194,6 +194,22 @@ SELECT {pk} FROM {Product} WHERE {code} LIKE ?pattern
 SELECT * FROM {Product} WHERE {code} LIKE ?pattern
 ```
 
+When you select `{pk}`, FlexibleSearch returns only primary keys. The platform then loads full model objects on demand via the model cache. Selecting additional columns (e.g., `{code}`, `{name}`) or using `SELECT *` forces the query to fetch all column data directly from the database, bypassing the cache and increasing I/O.
+
+### Skip Total Count
+By default, `FlexibleSearchQuery` executes an additional `COUNT(*)` subquery to populate `totalCount` in the result. For paginated queries where you do not need the total, disable it:
+
+```java
+FlexibleSearchQuery query = new FlexibleSearchQuery(queryString);
+query.setStart(offset);
+query.setCount(pageSize);
+query.setNeedTotal(false); // Skip COUNT(*) subquery — significant speedup on large tables
+
+SearchResult<ProductModel> result = flexibleSearchService.search(query);
+List<ProductModel> items = result.getResult();
+// result.getTotalCount() will return -1 when needTotal is false
+```
+
 ### Index Usage
 Ensure indexed attributes are used in WHERE:
 ```xml

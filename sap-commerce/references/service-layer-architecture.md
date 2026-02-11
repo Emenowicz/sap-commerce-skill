@@ -186,6 +186,8 @@ Configure all components in `*-spring.xml` files.
 
 ## Transaction Management
 
+> **WARNING:** Never use `@Transactional` on DAO methods. Transactions must be managed at the Service layer only. Placing transaction boundaries on DAOs breaks the ability for services to coordinate multiple DAO operations atomically and can lead to partial commits.
+
 Use declarative transactions via Spring annotations.
 
 **Annotation-Based:**

@@ -3,7 +3,7 @@
  * DAO interface for product data access operations.
  * DAOs abstract all database interactions using FlexibleSearch.
  */
-package com.company.core.daos;
+package com.example.core.daos;
 
 import de.hybris.platform.core.model.product.ProductModel;
 import java.util.List;
