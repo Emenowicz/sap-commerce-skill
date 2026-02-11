@@ -1,0 +1,79 @@
+-- user-queries.fxs
+-- Common FlexibleSearch queries for User and Customer operations
+
+-- Find user by UID
+SELECT {pk} FROM {User} WHERE {uid} = ?uid
+
+-- Find customer by email
+SELECT {pk} FROM {Customer}
+WHERE {uid} = ?email OR {contactEmail} = ?email
+
+-- Customers in specific group
+SELECT {c.pk} FROM {Customer AS c
+      JOIN PrincipalGroupRelation AS pgr ON {c.pk} = {pgr.source}
+      JOIN CustomerGroup AS cg ON {pgr.target} = {cg.pk}}
+WHERE {cg.uid} = ?groupId
+
+-- Active customers (logged in recently)
+SELECT {pk} FROM {Customer}
+WHERE {lastLogin} >= ?sinceDate
+ORDER BY {lastLogin} DESC
+
+-- Customers by registration date
+SELECT {pk} FROM {Customer}
+WHERE {creationtime} >= ?startDate
+      AND {creationtime} <= ?endDate
+ORDER BY {creationtime} DESC
+
+-- Search customers by name
+SELECT {pk} FROM {Customer}
+WHERE LOWER({name}) LIKE LOWER(?searchText)
+      OR LOWER({uid}) LIKE LOWER(?searchText)
+
+-- B2B customers by unit
+SELECT {pk} FROM {B2BCustomer}
+WHERE {defaultB2BUnit} = ?unit
+
+-- B2B unit hierarchy
+SELECT {pk} FROM {B2BUnit}
+WHERE {parentUnit} = ?parentUnit
+
+-- B2B customers with approval rights
+SELECT {c.pk} FROM {B2BCustomer AS c
+      JOIN PrincipalGroupRelation AS pgr ON {c.pk} = {pgr.source}
+      JOIN B2BUserGroup AS ug ON {pgr.target} = {ug.pk}}
+WHERE {ug.uid} = 'b2bapprovergroup'
+
+-- Customers with saved carts
+SELECT DISTINCT {c.user} FROM {Cart AS c}
+WHERE {c.saveTime} IS NOT NULL
+
+-- Customer addresses
+SELECT {pk} FROM {Address}
+WHERE {owner} = ?customer
+      AND {visibleInAddressBook} = true
+
+-- Default shipping address
+SELECT {pk} FROM {Address}
+WHERE {owner} = ?customer
+      AND {shippingAddress} = true
+
+-- Count customers by group
+SELECT {cg.uid}, COUNT({c.pk})
+FROM {Customer AS c
+      JOIN PrincipalGroupRelation AS pgr ON {c.pk} = {pgr.source}
+      JOIN CustomerGroup AS cg ON {pgr.target} = {cg.pk}}
+GROUP BY {cg.uid}
+
+-- Inactive customers (no orders)
+SELECT {c.pk} FROM {Customer AS c}
+WHERE NOT EXISTS (
+    SELECT 1 FROM {Order AS o} WHERE {o.user} = {c.pk}
+)
+
+-- VIP customers (high order value)
+SELECT {o.user}, SUM({o.totalPrice}) AS total
+FROM {Order AS o}
+GROUP BY {o.user}
+HAVING SUM({o.totalPrice}) > ?threshold
+ORDER BY total DESC

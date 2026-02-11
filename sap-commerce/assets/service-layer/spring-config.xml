@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    spring-config.xml
+    Spring bean configuration for service layer components.
+    Place this file in: resources/<extensionname>-spring.xml
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--
+        =====================================
+        DAO LAYER BEANS
+        =====================================
+        Alias pattern allows other extensions to override the implementation.
+    -->
+
+    <alias name="defaultProductDAO" alias="productDAO"/>
+    <bean id="defaultProductDAO" class="com.company.core.daos.impl.DefaultProductDAO">
+        <property name="flexibleSearchService" ref="flexibleSearchService"/>
+    </bean>
+
+    <!--
+        =====================================
+        SERVICE LAYER BEANS
+        =====================================
+    -->
+
+    <alias name="defaultProductService" alias="productService"/>
+    <bean id="defaultProductService" class="com.company.core.services.impl.DefaultProductService">
+        <property name="productDAO" ref="productDAO"/>
+        <property name="modelService" ref="modelService"/>
+    </bean>
+
+    <!--
+        =====================================
+        CONVERTER / POPULATOR BEANS
+        =====================================
+    -->
+
+    <!-- Basic Product Populator -->
+    <bean id="productBasicPopulator" class="com.company.facades.populators.ProductBasicPopulator"/>
+
+    <!-- Product Price Populator -->
+    <bean id="productPricePopulator" class="com.company.facades.populators.ProductPricePopulator">
+        <property name="priceService" ref="priceService"/>
+        <property name="commonI18NService" ref="commonI18NService"/>
+    </bean>
+
+    <!-- Product Stock Populator -->
+    <bean id="productStockPopulator" class="com.company.facades.populators.ProductStockPopulator">
+        <property name="stockService" ref="stockService"/>
+    </bean>
+
+    <!-- Basic Product Converter - minimal fields for list views -->
+    <alias name="defaultBasicProductConverter" alias="basicProductConverter"/>
+    <bean id="defaultBasicProductConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.company.facades.data.ProductData"/>
+        <property name="populators">
+            <list>
+                <ref bean="productBasicPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Full Product Converter - all fields for detail views -->
+    <alias name="defaultProductConverter" alias="productConverter"/>
+    <bean id="defaultProductConverter" parent="abstractPopulatingConverter">
+        <property name="targetClass" value="com.company.facades.data.ProductData"/>
+        <property name="populators">
+            <list>
+                <ref bean="productBasicPopulator"/>
+                <ref bean="productPricePopulator"/>
+                <ref bean="productStockPopulator"/>
+            </list>
+        </property>
+    </bean>
+
+    <!--
+        =====================================
+        FACADE LAYER BEANS
+        =====================================
+    -->
+
+    <alias name="defaultProductFacade" alias="productFacade"/>
+    <bean id="defaultProductFacade" class="com.company.facades.impl.DefaultProductFacade">
+        <property name="productService" ref="productService"/>
+        <property name="productConverter" ref="productConverter"/>
+    </bean>
+
+    <!--
+        =====================================
+        TRANSACTION CONFIGURATION
+        =====================================
+    -->
+
+    <!-- Enable @Transactional annotation support -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+</beans>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    extensioninfo.xml
+    Extension metadata and configuration.
+    Defines dependencies, modules, and extension properties.
+-->
+<extensioninfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="extensioninfo.xsd">
+
+    <extension name="customextension"
+               classprefix="Custom"
+               abstractextension="false"
+               version="1.0.0">
+
+        <!-- Platform dependencies - load these extensions first -->
+        <requires-extension name="commerceservices"/>
+        <requires-extension name="acceleratorservices"/>
+        <requires-extension name="commercefacades"/>
+
+        <!-- Core module - generates jalo/model classes -->
+        <coremodule generated="true"
+                    manager="de.hybris.platform.jalo.extension.ExtensionManager"
+                    packageroot="com.company.custom"/>
+
+        <!-- Optional: Web module for custom web application -->
+        <!--
+        <webmodule webroot="/customextension"
+                   jspcompile="true"/>
+        -->
+
+        <!-- Optional: HMC module for Backoffice integration (legacy) -->
+        <!--
+        <hmcmodule additionalclasspath=""
+                   extensionclassname="com.company.custom.hmc.CustomextensionHMCExtension"/>
+        -->
+
+    </extension>
+</extensioninfo>

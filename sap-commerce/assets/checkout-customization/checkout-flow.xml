@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    checkout-flow.xml
+    Spring Web Flow definition for checkout process.
+    Place in WEB-INF/config/spring-web-flow.xml
+-->
+<flow xmlns="http://www.springframework.org/schema/webflow"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.springframework.org/schema/webflow
+                          http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
+
+    <!-- Flow variables -->
+    <var name="checkoutForm" class="com.company.storefront.forms.CheckoutForm"/>
+
+    <!-- Secure the flow -->
+    <secured attributes="ROLE_CUSTOMERGROUP"/>
+
+    <!-- Start state - redirect to first step -->
+    <action-state id="start">
+        <evaluate expression="checkoutFlowFacade.initializeCheckout()"/>
+        <transition to="deliveryAddress"/>
+    </action-state>
+
+    <!-- Delivery Address Step -->
+    <view-state id="deliveryAddress" view="pages/checkout/multi/deliveryAddressPage">
+        <on-entry>
+            <evaluate expression="checkoutFlowFacade.getDeliveryAddresses()"
+                      result="flowScope.deliveryAddresses"/>
+            <evaluate expression="checkoutFlowFacade.getCountries()"
+                      result="flowScope.countries"/>
+        </on-entry>
+        <transition on="selectAddress" to="deliveryAddress">
+            <evaluate expression="checkoutFlowFacade.setDeliveryAddress(requestParameters.addressId)"/>
+        </transition>
+        <transition on="next" to="deliveryMethod">
+            <evaluate expression="checkoutFlowFacade.hasDeliveryAddress()"
+                      result="flowScope.hasAddress"/>
+        </transition>
+        <transition on="error" to="deliveryAddress"/>
+    </view-state>
+
+    <!-- Delivery Method Step -->
+    <view-state id="deliveryMethod" view="pages/checkout/multi/deliveryMethodPage">
+        <on-entry>
+            <evaluate expression="checkoutFlowFacade.getDeliveryModes()"
+                      result="flowScope.deliveryModes"/>
+        </on-entry>
+        <transition on="selectDeliveryMethod" to="deliveryMethod">
+            <evaluate expression="checkoutFlowFacade.setDeliveryMode(requestParameters.deliveryModeId)"/>
+        </transition>
+        <transition on="next" to="customStep"/>
+        <transition on="back" to="deliveryAddress"/>
+    </view-state>
+
+    <!-- Custom Step (inserted into flow) -->
+    <view-state id="customStep" view="pages/checkout/multi/customStepPage">
+        <on-entry>
+            <evaluate expression="customCheckoutFacade.getAvailableOptions()"
+                      result="flowScope.customOptions"/>
+            <evaluate expression="customCheckoutFacade.getSelectedCustomOption()"
+                      result="flowScope.selectedOption"/>
+        </on-entry>
+        <transition on="selectOption" to="customStep">
+            <evaluate expression="customCheckoutFacade.saveCustomOption(requestParameters.optionId)"/>
+        </transition>
+        <transition on="next" to="payment"/>
+        <transition on="back" to="deliveryMethod"/>
+        <transition on="skip" to="payment">
+            <!-- Allow skipping if not required -->
+        </transition>
+    </view-state>
+
+    <!-- Payment Step -->
+    <view-state id="payment" view="pages/checkout/multi/paymentPage">
+        <on-entry>
+            <evaluate expression="checkoutFlowFacade.getPaymentMethods()"
+                      result="flowScope.paymentMethods"/>
+        </on-entry>
+        <transition on="addPayment" to="payment">
+            <evaluate expression="checkoutFlowFacade.createPaymentInfo(paymentForm)"
+                      result="flowScope.paymentInfo"/>
+        </transition>
+        <transition on="next" to="review"/>
+        <transition on="back" to="customStep"/>
+    </view-state>
+
+    <!-- Review Step -->
+    <view-state id="review" view="pages/checkout/multi/reviewPage">
+        <on-entry>
+            <evaluate expression="checkoutFlowFacade.getCheckoutCart()"
+                      result="flowScope.cartData"/>
+        </on-entry>
+        <transition on="placeOrder" to="processOrder"/>
+        <transition on="back" to="payment"/>
+    </view-state>
+
+    <!-- Process Order (action state) -->
+    <action-state id="processOrder">
+        <evaluate expression="checkoutFlowFacade.placeOrder()"
+                  result="flowScope.orderData"/>
+        <transition on="success" to="orderConfirmation"/>
+        <transition on="error" to="review"/>
+    </action-state>
+
+    <!-- Order Confirmation (end state) -->
+    <end-state id="orderConfirmation"
+               view="externalRedirect:contextRelative:/checkout/orderConfirmation/${flowScope.orderData.code}"/>
+
+    <!-- Global error handling -->
+    <global-transitions>
+        <transition on-exception="java.lang.Exception" to="error"/>
+    </global-transitions>
+
+    <end-state id="error" view="pages/checkout/multi/errorPage"/>
+
+</flow>

@@ -1,0 +1,56 @@
+# category-hierarchy.impex
+# Create category structure with parent-child relationships
+
+$productCatalog=electronicsProductCatalog
+$productCV=catalogVersion(catalog(id[default=$productCatalog]),version[default='Online'])[unique=true]
+$supercategories=supercategories(code,$productCV)
+$lang=en
+
+# Root Categories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];description[lang=$lang];allowedPrincipals(uid)[default='customergroup']
+;root;;Root Category;Top level category
+;electronics;;Electronics;Electronic devices and accessories
+;clothing;;Clothing;Fashion and apparel
+;home;;Home & Garden;Home improvement and garden
+
+# Electronics Subcategories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];$supercategories;allowedPrincipals(uid)[default='customergroup']
+;computers;;Computers;electronics
+;phones;;Phones & Tablets;electronics
+;accessories;;Accessories;electronics
+;audio;;Audio & Video;electronics
+
+# Computer Subcategories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];$supercategories
+;laptops;;Laptops;computers
+;desktops;;Desktop Computers;computers
+;monitors;;Monitors;computers
+;components;;Computer Components;computers
+
+# Phone Subcategories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];$supercategories
+;smartphones;;Smartphones;phones
+;tablets;;Tablets;phones
+;wearables;;Wearables;phones
+
+# Clothing Subcategories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];$supercategories
+;mens;;Men's Clothing;clothing
+;womens;;Women's Clothing;clothing
+;kids;;Kids' Clothing;clothing
+;sportswear;;Sportswear;clothing
+
+# Home Subcategories
+INSERT_UPDATE Category;code[unique=true];$productCV;name[lang=$lang];$supercategories
+;furniture;;Furniture;home
+;garden;;Garden;home
+;kitchen;;Kitchen;home
+;decor;;Home Decor;home
+
+# Navigation structure (optional)
+$contentCV=catalogVersion(CatalogVersion.catalog(Catalog.id[default='electronicsContentCatalog']),CatalogVersion.version[default='Online'])
+
+INSERT_UPDATE CMSNavigationNode;uid[unique=true];$contentCV;name;parent(uid,$contentCV);links(&linkRef)
+;ElectronicsNavNode;;Electronics;;
+;ComputersNavNode;;Computers;ElectronicsNavNode;
+;PhonesNavNode;;Phones;ElectronicsNavNode;

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+    Enumeration Examples
+    Demonstrates static and dynamic enumerations
+-->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <enumtypes>
+        <!--
+            Static Enum: TicketPriority
+            - Fixed set of values, cannot be extended at runtime
+            - Use when values are known and stable
+            - dynamic="false" (default)
+        -->
+        <enumtype code="TicketPriority" autocreate="true" generate="true" dynamic="false">
+            <description>Support ticket priority levels</description>
+            <value code="LOW">
+                <description>Low priority - response within 72 hours</description>
+            </value>
+            <value code="MEDIUM">
+                <description>Medium priority - response within 24 hours</description>
+            </value>
+            <value code="HIGH">
+                <description>High priority - response within 4 hours</description>
+            </value>
+            <value code="CRITICAL">
+                <description>Critical - immediate response required</description>
+            </value>
+        </enumtype>
+
+        <!--
+            Static Enum: TicketStatus
+            - Workflow states for support tickets
+        -->
+        <enumtype code="TicketStatus" autocreate="true" generate="true" dynamic="false">
+            <description>Support ticket status</description>
+            <value code="OPEN"/>
+            <value code="IN_PROGRESS"/>
+            <value code="WAITING_ON_CUSTOMER"/>
+            <value code="RESOLVED"/>
+            <value code="CLOSED"/>
+        </enumtype>
+
+        <!--
+            Static Enum: PaymentMethodType
+            - Payment method categories
+        -->
+        <enumtype code="PaymentMethodType" autocreate="true" generate="true" dynamic="false">
+            <description>Payment method types</description>
+            <value code="CREDIT_CARD"/>
+            <value code="DEBIT_CARD"/>
+            <value code="BANK_TRANSFER"/>
+            <value code="PAYPAL"/>
+            <value code="INVOICE"/>
+            <value code="CASH_ON_DELIVERY"/>
+        </enumtype>
+
+        <!--
+            Dynamic Enum: ShippingCarrier
+            - Can be extended at runtime via ImpEx or API
+            - Use when new values may be added without rebuild
+            - dynamic="true"
+        -->
+        <enumtype code="ShippingCarrier" autocreate="true" generate="true" dynamic="true">
+            <description>Shipping carriers (extensible at runtime)</description>
+            <value code="DHL"/>
+            <value code="UPS"/>
+            <value code="FEDEX"/>
+            <value code="USPS"/>
+        </enumtype>
+
+        <!--
+            Dynamic Enum: ReturnReason
+            - Return reasons can be customized per business
+        -->
+        <enumtype code="ReturnReason" autocreate="true" generate="true" dynamic="true">
+            <description>Product return reasons (extensible)</description>
+            <value code="DEFECTIVE"/>
+            <value code="WRONG_ITEM"/>
+            <value code="NOT_AS_DESCRIBED"/>
+            <value code="CHANGED_MIND"/>
+            <value code="OTHER"/>
+        </enumtype>
+    </enumtypes>
+
+    <itemtypes>
+        <!--
+            SupportTicket: Uses enum attributes
+        -->
+        <itemtype code="SupportTicket" autocreate="true" generate="true">
+            <deployment table="SupportTickets" typecode="10030"/>
+            <attributes>
+                <attribute qualifier="ticketId" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <attribute qualifier="subject" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Using TicketPriority enum -->
+                <attribute qualifier="priority" type="TicketPriority">
+                    <description>Ticket priority level</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                    <!-- Default value using em() helper -->
+                    <defaultvalue>em().getEnumerationValue("TicketPriority","MEDIUM")</defaultvalue>
+                </attribute>
+
+                <!-- Using TicketStatus enum -->
+                <attribute qualifier="status" type="TicketStatus">
+                    <description>Current ticket status</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                    <defaultvalue>em().getEnumerationValue("TicketStatus","OPEN")</defaultvalue>
+                </attribute>
+            </attributes>
+
+            <indexes>
+                <index name="priorityIdx">
+                    <key attribute="priority"/>
+                </index>
+                <index name="statusIdx">
+                    <key attribute="status"/>
+                </index>
+            </indexes>
+        </itemtype>
+
+        <!--
+            Shipment: Uses dynamic enum
+        -->
+        <itemtype code="Shipment" autocreate="true" generate="true">
+            <deployment table="Shipments" typecode="10031"/>
+            <attributes>
+                <attribute qualifier="trackingNumber" type="java.lang.String">
+                    <modifiers read="true" write="true" optional="false" unique="true"/>
+                    <persistence type="property"/>
+                </attribute>
+
+                <!-- Using dynamic ShippingCarrier enum -->
+                <attribute qualifier="carrier" type="ShippingCarrier">
+                    <description>Shipping carrier (new carriers can be added at runtime)</description>
+                    <modifiers read="true" write="true" optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemtypes>
+</items>
