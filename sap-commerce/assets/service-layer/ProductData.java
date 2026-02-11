@@ -3,7 +3,7 @@
  * Data Transfer Object (DTO) for product information.
  * DTOs carry data between facade and presentation layers.
  */
-package com.company.facades.data;
+package com.example.facades.data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

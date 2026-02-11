@@ -3,9 +3,9 @@
  * Facade interface defining the external API for product operations.
  * Facades expose only DTOs to the presentation layer, never Models.
  */
-package com.company.facades;
+package com.example.facades;
 
-import com.company.facades.data.ProductData;
+import com.example.facades.data.ProductData;
 import java.util.List;
 
 /**

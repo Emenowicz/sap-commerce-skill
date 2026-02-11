@@ -74,6 +74,9 @@ if [ -z "$HAC_PASSWORD" ]; then
     exit 1
 fi
 
+COOKIE_FILE=$(mktemp /tmp/hac_cookies.XXXXXX)
+trap "rm -f $COOKIE_FILE" EXIT
+
 echo "=== FlexibleSearch Query Executor ==="
 echo "HAC URL: $HAC_URL"
 echo "Query: $QUERY"
@@ -110,7 +113,7 @@ SCRIPT="${SCRIPT//QUERY_PLACEHOLDER/\"$ESCAPED_QUERY\"}"
 
 # Get CSRF token first
 echo "Authenticating..."
-CSRF_RESPONSE=$(curl -s -c /tmp/hac_cookies.txt -b /tmp/hac_cookies.txt \
+CSRF_RESPONSE=$(curl -s -c $COOKIE_FILE -b $COOKIE_FILE \
     -u "$HAC_USER:$HAC_PASSWORD" \
     -k "$HAC_URL/console/scripting" 2>/dev/null)
 
@@ -125,7 +128,7 @@ echo "Executing query..."
 
 # Execute script via HAC
 RESPONSE=$(curl -s -X POST \
-    -c /tmp/hac_cookies.txt -b /tmp/hac_cookies.txt \
+    -c $COOKIE_FILE -b $COOKIE_FILE \
     -u "$HAC_USER:$HAC_PASSWORD" \
     -k "$HAC_URL/console/scripting/execute" \
     -H "Content-Type: application/x-www-form-urlencoded" \
@@ -160,9 +163,6 @@ else
     echo "$RESPONSE"
     exit 1
 fi
-
-# Cleanup
-rm -f /tmp/hac_cookies.txt
 
 echo ""
 echo "Done."

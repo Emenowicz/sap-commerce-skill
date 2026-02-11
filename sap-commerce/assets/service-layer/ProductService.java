@@ -3,7 +3,7 @@
  * Service interface defining business operations for products.
  * Services work with Models and contain business logic.
  */
-package com.company.core.services;
+package com.example.core.services;
 
 import de.hybris.platform.core.model.product.ProductModel;
 import java.util.List;

@@ -67,6 +67,8 @@ Key attributes:
 - `generate`: Generate model class
 - `jaloclass`: Deprecated Jalo layer class
 
+> **WARNING: Jalo Layer Deprecated.** The `jaloclass` attribute is deprecated since SAP Commerce 6.0. Do **not** extend generated Jalo classes or place business logic in the Jalo layer. Use the ServiceLayer with `ModelService` instead. The `jaloclass` attribute exists only for backward compatibility and will be removed in a future release.
+
 ## Attribute Types and Modifiers
 
 ### Primitive Types

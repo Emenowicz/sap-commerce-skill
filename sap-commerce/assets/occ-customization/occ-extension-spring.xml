@@ -15,16 +15,16 @@
     <!-- ================================ -->
 
     <bean id="customProductPopulator"
-          class="com.company.populators.CustomProductPopulator"/>
+          class="com.example.populators.CustomProductPopulator"/>
 
     <bean id="customProductPricePopulator"
-          class="com.company.populators.CustomProductPricePopulator">
+          class="com.example.populators.CustomProductPricePopulator">
         <property name="priceDataFactory" ref="priceDataFactory"/>
         <property name="commonI18NService" ref="commonI18NService"/>
     </bean>
 
     <bean id="customProductImagePopulator"
-          class="com.company.populators.CustomProductImagePopulator">
+          class="com.example.populators.CustomProductImagePopulator">
         <property name="imageConverter" ref="imageConverter"/>
     </bean>
 
@@ -35,7 +35,7 @@
     <!-- Basic converter - minimal fields -->
     <alias name="defaultBasicCustomProductConverter" alias="basicCustomProductConverter"/>
     <bean id="defaultBasicCustomProductConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="targetClass" value="com.example.dto.CustomProductWsDTO"/>
         <property name="populators">
             <list>
                 <ref bean="customProductPopulator"/>
@@ -46,7 +46,7 @@
     <!-- Full converter - all fields -->
     <alias name="defaultCustomProductConverter" alias="customProductConverter"/>
     <bean id="defaultCustomProductConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="targetClass" value="com.example.dto.CustomProductWsDTO"/>
         <property name="populators">
             <list>
                 <ref bean="customProductPopulator"/>
@@ -62,7 +62,7 @@
 
     <!-- Define which fields to include at each level -->
     <bean parent="fieldSetLevelMapping">
-        <property name="dtoClass" value="com.company.dto.CustomProductWsDTO"/>
+        <property name="dtoClass" value="com.example.dto.CustomProductWsDTO"/>
         <property name="levelMapping">
             <map>
                 <entry key="BASIC" value="code,name"/>
@@ -74,7 +74,7 @@
 
     <!-- List DTO field mapping -->
     <bean parent="fieldSetLevelMapping">
-        <property name="dtoClass" value="com.company.dto.CustomProductListWsDTO"/>
+        <property name="dtoClass" value="com.example.dto.CustomProductListWsDTO"/>
         <property name="levelMapping">
             <map>
                 <entry key="BASIC" value="products(BASIC),totalCount"/>
@@ -89,7 +89,7 @@
     <!-- ================================ -->
 
     <bean id="customProductController"
-          class="com.company.controllers.CustomProductController">
+          class="com.example.controllers.CustomProductController">
         <property name="customProductFacade" ref="customProductFacade"/>
         <property name="dataMapper" ref="dataMapper"/>
     </bean>
@@ -99,7 +99,7 @@
     <!-- ================================ -->
 
     <bean id="customProductValidator"
-          class="com.company.validators.CustomProductValidator"/>
+          class="com.example.validators.CustomProductValidator"/>
 
     <!-- ================================ -->
     <!-- EXCEPTION HANDLERS               -->
@@ -107,6 +107,6 @@
 
     <!-- Add custom exception handling -->
     <bean id="customExceptionHandler"
-          class="com.company.handlers.CustomExceptionHandler"/>
+          class="com.example.handlers.CustomExceptionHandler"/>
 
 </beans>

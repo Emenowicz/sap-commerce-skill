@@ -3,11 +3,11 @@
  * Default implementation of ProductFacade.
  * Follows SAP Commerce naming convention: Default* prefix for implementations.
  */
-package com.company.facades.impl;
+package com.example.facades.impl;
 
-import com.company.facades.ProductFacade;
-import com.company.facades.data.ProductData;
-import com.company.core.services.ProductService;
+import com.example.facades.ProductFacade;
+import com.example.facades.data.ProductData;
+import com.example.core.services.ProductService;
 
 import de.hybris.platform.converters.Converters;
 import de.hybris.platform.core.model.product.ProductModel;

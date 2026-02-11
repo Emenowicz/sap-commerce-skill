@@ -93,7 +93,7 @@
             <description>Product to Tag many-to-many relationship</description>
 
             <!-- Deployment creates a link table -->
-            <deployment table="Prod2Tag" typecode="10100"/>
+            <deployment table="Prod2Tag" typecode="20100"/>
 
             <!-- Source: Product -->
             <sourceElement type="Product"
@@ -121,6 +121,8 @@
         -->
         <relation code="Employee2Manager" localized="false" autocreate="true">
             <description>Employee manager hierarchy</description>
+
+            <deployment table="Emp2Mgr" typecode="20200"/>
 
             <sourceElement type="StoreEmployee"
                           qualifier="directReports"

@@ -3,12 +3,12 @@
  * REST controller for custom product endpoints.
  * Demonstrates OCC API patterns with Swagger documentation.
  */
-package com.company.controllers;
+package com.example.controllers;
 
-import com.company.dto.CustomProductWsDTO;
-import com.company.dto.CustomProductListWsDTO;
-import com.company.facades.CustomProductFacade;
-import com.company.facades.data.CustomProductData;
+import com.example.dto.CustomProductWsDTO;
+import com.example.dto.CustomProductListWsDTO;
+import com.example.facades.CustomProductFacade;
+import com.example.facades.data.CustomProductData;
 
 import de.hybris.platform.commercewebservicescommons.dto.product.ProductWsDTO;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
@@ -20,7 +20,10 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
+
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -166,6 +169,18 @@ public class CustomProductController {
             @PathVariable String productCode) {
 
         customProductFacade.deleteProduct(productCode);
+    }
+
+    @ExceptionHandler(UnknownIdentifierException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleUnknownIdentifier(final UnknownIdentifierException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseBody
+    public ResponseEntity<String> handleIllegalArgument(final IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // Setter for testing

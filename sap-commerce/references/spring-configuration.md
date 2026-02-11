@@ -61,7 +61,9 @@ public class DefaultProductService implements ProductService {
 
 ## Autowiring Strategies
 
-### @Resource (by name)
+> **Best Practice:** Prefer `@Resource` (JSR-250, name-based) over `@Autowired` (Spring, type-based) in SAP Commerce. The platform relies heavily on bean aliases (e.g., `alias="productService"` pointing to `defaultProductService`). `@Resource` resolves by bean name, which correctly follows alias chains. `@Autowired` resolves by type, which can cause ambiguity when multiple beans of the same type exist or when alias overrides are in play.
+
+### @Resource (by name) — Preferred
 ```java
 @Resource(name = "productDAO")
 private ProductDAO productDAO;

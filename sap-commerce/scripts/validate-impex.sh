@@ -91,6 +91,10 @@ while IFS= read -r line || [ -n "$line" ]; do
         MACROS=$(echo "$line" | grep -oE '\$[a-zA-Z_][a-zA-Z0-9_]*' | sort -u)
         # This is just a warning - macros might be defined elsewhere
         for macro in $MACROS; do
+            # Skip system-provided macros
+            if [[ "$macro" =~ ^\$(config-|lang-|START_|END_) ]]; then
+                continue
+            fi
             if ! grep -q "^[[:space:]]*${macro}=" "$IMPEX_FILE"; then
                 echo -e "${YELLOW}Line $LINE_NUM: Macro $macro may not be defined in this file${NC}"
                 ((WARNINGS++))

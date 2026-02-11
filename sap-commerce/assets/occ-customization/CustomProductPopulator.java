@@ -3,10 +3,10 @@
  * Populator for converting CustomProductData to CustomProductWsDTO.
  * Used by converters in the OCC layer.
  */
-package com.company.populators;
+package com.example.populators;
 
-import com.company.dto.CustomProductWsDTO;
-import com.company.facades.data.CustomProductData;
+import com.example.dto.CustomProductWsDTO;
+import com.example.facades.data.CustomProductData;
 
 import de.hybris.platform.converters.Populator;
 import de.hybris.platform.servicelayer.dto.converter.ConversionException;

@@ -13,17 +13,40 @@ echo ""
 read -p "Enter extension name (lowercase, no spaces): " EXT_NAME
 
 # Validate extension name
-if [[ ! "$EXT_NAME" =~ ^[a-z][a-z0-9]*$ ]]; then
-    echo "Error: Extension name must start with a letter and contain only lowercase letters and numbers"
+if [[ ! "$EXT_NAME" =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
+    echo "Error: Extension name must start with a letter and contain only letters, numbers, and underscores"
     exit 1
 fi
 
 # Prompt for dependencies
 read -p "Enter required extensions (comma-separated, e.g., commerceservices,acceleratorservices): " DEPENDENCIES
 
+# Validate dependency names
+if [ -n "$DEPENDENCIES" ]; then
+    IFS=',' read -ra DEP_CHECK <<< "$DEPENDENCIES"
+    for dep in "${DEP_CHECK[@]}"; do
+        dep=$(echo "$dep" | xargs)
+        if [[ ! "$dep" =~ ^[a-zA-Z][a-zA-Z0-9_]*$ ]]; then
+            echo "Error: Invalid dependency name: '$dep' (must start with a letter and contain only letters, numbers, and underscores)"
+            exit 1
+        fi
+    done
+fi
+
 # Prompt for output directory
 read -p "Enter output directory [./]: " OUTPUT_DIR
 OUTPUT_DIR=${OUTPUT_DIR:-.}
+
+# Validate output directory exists and is writable
+if [ ! -d "$OUTPUT_DIR" ]; then
+    echo "Error: Output directory does not exist: $OUTPUT_DIR"
+    exit 1
+fi
+
+if [ ! -w "$OUTPUT_DIR" ]; then
+    echo "Error: Output directory is not writable: $OUTPUT_DIR"
+    exit 1
+fi
 
 EXT_PATH="$OUTPUT_DIR/$EXT_NAME"
 

@@ -160,20 +160,51 @@ ant clean all
 ```json
 {
   "commerceSuiteVersion": "2211",
+  "useConfig": {
+    "properties": [
+      {
+        "location": "hybris/config/common.properties"
+      },
+      {
+        "location": "hybris/config/accstorefront.properties",
+        "persona": "development"
+      }
+    ],
+    "solr": {
+      "location": "hybris/config/solr"
+    }
+  },
   "extensions": [
     "commercewebservices",
     "yacceleratorstorefront",
     "customextension"
   ],
+  "tests": {
+    "extensions": [
+      "customextension"
+    ]
+  },
   "aspects": [
     {
       "name": "backoffice",
+      "properties": [
+        {
+          "key": "backoffice.fill.typefacade.cache.maxEntries",
+          "value": "2000"
+        }
+      ],
       "webapps": [
         {"name": "backoffice", "contextPath": "/backoffice"}
       ]
     },
     {
       "name": "api",
+      "properties": [
+        {
+          "key": "occ.rewrite.overlapping.paths.enabled",
+          "value": "true"
+        }
+      ],
       "webapps": [
         {"name": "commercewebservices", "contextPath": "/occ"}
       ]

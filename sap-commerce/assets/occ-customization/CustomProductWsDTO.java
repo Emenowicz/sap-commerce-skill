@@ -3,7 +3,7 @@
  * Web Service DTO for custom product API responses.
  * Uses Swagger annotations for API documentation.
  */
-package com.company.dto;
+package com.example.dto;
 
 import de.hybris.platform.commercewebservicescommons.dto.product.PriceWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO;

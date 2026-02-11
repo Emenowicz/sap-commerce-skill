@@ -3,9 +3,9 @@
  * Default implementation of ProductDAO using FlexibleSearch.
  * Demonstrates query patterns, pagination, and joins.
  */
-package com.company.core.daos.impl;
+package com.example.core.daos.impl;
 
-import com.company.core.daos.ProductDAO;
+import com.example.core.daos.ProductDAO;
 
 import de.hybris.platform.core.model.product.ProductModel;
 import de.hybris.platform.servicelayer.search.FlexibleSearchQuery;
@@ -17,6 +17,11 @@ import java.util.List;
 
 /**
  * Default implementation of ProductDAO using FlexibleSearch.
+ *
+ * <p><strong>Important:</strong> DAOs must NOT be annotated with {@code @Transactional}.
+ * Transaction boundaries are managed at the Service layer. Placing {@code @Transactional}
+ * on DAO methods prevents services from coordinating multiple DAO calls within a single
+ * atomic transaction.</p>
  *
  * FlexibleSearch patterns demonstrated:
  * - Basic SELECT with WHERE clause
