@@ -2,10 +2,10 @@
  * CustomCheckoutStep.java
  * Custom checkout step controller for accelerator checkout flow.
  */
-package com.company.storefront.controllers.pages.checkout.steps;
+package com.example.storefront.controllers.pages.checkout.steps;
 
-import com.company.facades.CustomCheckoutFacade;
-import com.company.storefront.forms.CustomStepForm;
+import com.example.facades.CustomCheckoutFacade;
+import com.example.storefront.forms.CustomStepForm;
 
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.PreValidateCheckoutStep;
 import de.hybris.platform.acceleratorstorefrontcommons.annotations.RequireHardLogIn;

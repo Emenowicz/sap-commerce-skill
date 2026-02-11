@@ -10,7 +10,7 @@
                           http://www.springframework.org/schema/webflow/spring-webflow-2.0.xsd">
 
     <!-- Flow variables -->
-    <var name="checkoutForm" class="com.company.storefront.forms.CheckoutForm"/>
+    <var name="checkoutForm" class="com.example.storefront.forms.CheckoutForm"/>
 
     <!-- Secure the flow -->
     <secured attributes="ROLE_CUSTOMERGROUP"/>

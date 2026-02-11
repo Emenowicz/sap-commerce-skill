@@ -30,7 +30,7 @@ Global Context (platform level)
 
 ### XML Configuration
 ```xml
-<bean id="productService" class="com.company.services.impl.DefaultProductService">
+<bean id="productService" class="com.example.services.impl.DefaultProductService">
     <property name="productDAO" ref="productDAO"/>
     <property name="modelService" ref="modelService"/>
 </bean>
@@ -39,7 +39,7 @@ Global Context (platform level)
 ### Alias Pattern
 ```xml
 <alias name="defaultProductService" alias="productService"/>
-<bean id="defaultProductService" class="com.company.services.impl.DefaultProductService">
+<bean id="defaultProductService" class="com.example.services.impl.DefaultProductService">
     <property name="productDAO" ref="productDAO"/>
 </bean>
 ```
@@ -56,7 +56,7 @@ public class DefaultProductService implements ProductService {
 
 ### Component Scan
 ```xml
-<context:component-scan base-package="com.company.services"/>
+<context:component-scan base-package="com.example.services"/>
 ```
 
 ## Autowiring Strategies
@@ -165,11 +165,11 @@ boolean enabled = configurationService.getConfiguration()
 
 ### Interceptors via XML
 ```xml
-<bean id="loggingInterceptor" class="com.company.interceptors.LoggingInterceptor"/>
+<bean id="loggingInterceptor" class="com.example.interceptors.LoggingInterceptor"/>
 
 <aop:config>
     <aop:pointcut id="servicePointcut"
-                  expression="execution(* com.company.services.*.*(..))"/>
+                  expression="execution(* com.example.services.*.*(..))"/>
     <aop:advisor advice-ref="loggingInterceptor" pointcut-ref="servicePointcut"/>
 </aop:config>
 ```
@@ -180,7 +180,7 @@ boolean enabled = configurationService.getConfiguration()
 @Component
 public class LoggingAspect {
 
-    @Before("execution(* com.company.services.*.*(..))")
+    @Before("execution(* com.example.services.*.*(..))")
     public void logMethodEntry(JoinPoint joinPoint) {
         LOG.debug("Entering: " + joinPoint.getSignature());
     }
@@ -223,7 +223,7 @@ public class OrderCreatedEventListener extends AbstractEventListener<OrderCreate
 ### Register Listener
 ```xml
 <bean id="orderCreatedEventListener"
-      class="com.company.listeners.OrderCreatedEventListener"
+      class="com.example.listeners.OrderCreatedEventListener"
       parent="abstractEventListener">
     <property name="modelService" ref="modelService"/>
 </bean>
@@ -257,7 +257,7 @@ public class ProductValidationInterceptor implements ValidateInterceptor<Product
 ### Register Interceptor
 ```xml
 <bean id="productValidationInterceptor"
-      class="com.company.interceptors.ProductValidationInterceptor"/>
+      class="com.example.interceptors.ProductValidationInterceptor"/>
 
 <bean id="productValidationInterceptorMapping"
       class="de.hybris.platform.servicelayer.interceptor.impl.InterceptorMapping">
@@ -283,7 +283,7 @@ public class ProductValidationInterceptor implements ValidateInterceptor<Product
 <!-- Override in custom extension -->
 <alias name="customProductService" alias="productService"/>
 <bean id="customProductService"
-      class="com.company.services.impl.CustomProductService"
+      class="com.example.services.impl.CustomProductService"
       parent="defaultProductService">
     <!-- Additional config -->
 </bean>
@@ -292,7 +292,7 @@ public class ProductValidationInterceptor implements ValidateInterceptor<Product
 ### Via Parent Bean
 ```xml
 <bean id="customProductFacade"
-      class="com.company.facades.impl.CustomProductFacade"
+      class="com.example.facades.impl.CustomProductFacade"
       parent="defaultProductFacade">
     <property name="customService" ref="customService"/>
 </bean>
@@ -308,7 +308,7 @@ public class ProductValidationInterceptor implements ValidateInterceptor<Product
 
 <!-- Concrete child -->
 <bean id="productService" parent="abstractService"
-      class="com.company.services.impl.DefaultProductService">
+      class="com.example.services.impl.DefaultProductService">
     <property name="productDAO" ref="productDAO"/>
 </bean>
 ```
@@ -316,7 +316,7 @@ public class ProductValidationInterceptor implements ValidateInterceptor<Product
 ### Conditional Beans
 ```xml
 <bean id="featureService"
-      class="com.company.services.impl.FeatureServiceImpl">
+      class="com.example.services.impl.FeatureServiceImpl">
     <property name="enabled" value="${feature.enabled:false}"/>
 </bean>
 ```

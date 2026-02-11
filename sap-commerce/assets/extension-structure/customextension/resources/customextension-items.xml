@@ -24,7 +24,7 @@
         <itemtype code="CustomItem"
                   autocreate="true"
                   generate="true"
-                  jaloclass="com.company.custom.jalo.CustomItem">
+                  jaloclass="com.example.custom.jalo.CustomItem">
 
             <deployment table="CustomItems" typecode="10500"/>
 

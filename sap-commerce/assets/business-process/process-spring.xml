@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        Business process Spring configuration.
+        Each action bean must have parent="abstractAction" to inherit
+        process engine integration (modelService, processParameterHelper, etc.).
+    -->
+
+    <!-- Action beans -->
+    <bean id="validateOrderAction"
+          class="com.example.actions.ValidateOrderAction"
+          parent="abstractAction"/>
+
+    <bean id="checkPaymentAction"
+          class="com.example.actions.CheckPaymentAction"
+          parent="abstractAction">
+        <property name="paymentService" ref="paymentService"/>
+    </bean>
+
+    <bean id="allocateStockAction"
+          class="com.example.actions.AllocateStockAction"
+          parent="abstractAction">
+        <property name="stockService" ref="stockService"/>
+    </bean>
+
+    <bean id="sendConfirmationEmailAction"
+          class="com.example.actions.SendConfirmationEmailAction"
+          parent="abstractAction">
+        <property name="emailService" ref="emailService"/>
+    </bean>
+
+    <!--
+        Process definition resource registration.
+        This tells the process engine where to find the XML definition.
+    -->
+    <bean id="customFulfillmentProcessDefinitionResource"
+          class="de.hybris.platform.processengine.definition.ProcessDefinitionResource">
+        <property name="resource" value="classpath:/processes/custom-process.xml"/>
+    </bean>
+
+</beans>

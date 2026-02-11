@@ -20,7 +20,7 @@
         <!-- Core module - generates jalo/model classes -->
         <coremodule generated="true"
                     manager="de.hybris.platform.jalo.extension.ExtensionManager"
-                    packageroot="com.company.custom"/>
+                    packageroot="com.example.custom"/>
 
         <!-- Optional: Web module for custom web application -->
         <!--
@@ -31,7 +31,7 @@
         <!-- Optional: HMC module for Backoffice integration (legacy) -->
         <!--
         <hmcmodule additionalclasspath=""
-                   extensionclassname="com.company.custom.hmc.CustomextensionHMCExtension"/>
+                   extensionclassname="com.example.custom.hmc.CustomextensionHMCExtension"/>
         -->
 
     </extension>

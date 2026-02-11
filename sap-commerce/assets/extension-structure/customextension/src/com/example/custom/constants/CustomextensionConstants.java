@@ -3,7 +3,7 @@
  * Constants class for the extension.
  * Contains extension name and other constant values.
  */
-package com.company.custom.constants;
+package com.example.custom.constants;
 
 /**
  * Global constants for the customextension.

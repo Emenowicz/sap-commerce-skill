@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        CronJob Spring bean configuration.
+        The bean ID here must match the springId in the ServicelayerJob ImpEx.
+    -->
+
+    <!-- Simple CronJob using base CronJobModel -->
+    <bean id="customCleanupJobPerformable"
+          class="com.example.jobs.CustomJobPerformable"
+          parent="abstractJobPerformable">
+        <!-- Inject any required services -->
+        <!-- <property name="modelService" ref="modelService"/> -->
+        <!-- <property name="flexibleSearchService" ref="flexibleSearchService"/> -->
+    </bean>
+
+    <!-- Typed CronJob using custom DataExportCronJobModel -->
+    <bean id="dataExportJobPerformable"
+          class="com.example.jobs.DataExportJobPerformable"
+          parent="abstractJobPerformable">
+        <!-- <property name="exportService" ref="exportService"/> -->
+    </bean>
+
+</beans>

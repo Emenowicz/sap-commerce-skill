@@ -49,7 +49,7 @@
                   extends="Product"
                   autocreate="true"
                   generate="true"
-                  jaloclass="com.company.jalo.CustomProduct">
+                  jaloclass="com.example.jalo.CustomProduct">
 
             <!-- Separate table for custom attributes (joined inheritance) -->
             <deployment table="CustomProducts" typecode="10002"/>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+
+    <!--
+        Custom CronJob type with additional parameters.
+        Extend CronJob to add configuration attributes that are
+        accessible in the JobPerformable via the typed CronJob model.
+    -->
+    <enumtypes>
+        <enumtype code="ExportFormat" autocreate="true" generate="true" dynamic="false">
+            <value code="CSV"/>
+            <value code="XML"/>
+            <value code="JSON"/>
+        </enumtype>
+    </enumtypes>
+
+    <itemtypes>
+
+        <itemtype code="DataExportCronJob"
+                  extends="CronJob"
+                  autocreate="true"
+                  generate="true"
+                  jaloclass="com.example.jalo.DataExportCronJob">
+            <description>CronJob for scheduled data export with configurable parameters.</description>
+            <attributes>
+                <attribute qualifier="exportPath" type="java.lang.String">
+                    <description>File system path for export output</description>
+                    <modifiers optional="false"/>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="maxRecords" type="java.lang.Integer">
+                    <description>Maximum number of records to export per run</description>
+                    <defaultvalue>Integer.valueOf(1000)</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+                <attribute qualifier="exportFormat" type="ExportFormat">
+                    <description>Output format for the export</description>
+                    <defaultvalue>em().getEnumerationValue("ExportFormat", "CSV")</defaultvalue>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+
+    </itemtypes>
+
+</items>

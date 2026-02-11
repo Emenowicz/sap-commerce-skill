@@ -3,9 +3,9 @@
  * System setup class for creating essential and project data.
  * Runs during ant initialize and ant updatesystem.
  */
-package com.company.custom.setup;
+package com.example.custom.setup;
 
-import com.company.custom.constants.CustomextensionConstants;
+import com.example.custom.constants.CustomextensionConstants;
 
 import de.hybris.platform.core.initialization.SystemSetup;
 import de.hybris.platform.core.initialization.SystemSetup.Process;

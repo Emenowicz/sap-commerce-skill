@@ -1,0 +1,20 @@
+# Business Process Setup ImpEx
+# Registers process definitions and optionally creates test process instances.
+
+# -----------------------------------------------
+# Process Definition Registration (alternative to Spring bean)
+# -----------------------------------------------
+# Typically process definitions are registered via Spring beans
+# (ProcessDefinitionResource). Use ImpEx only if Spring is not suitable.
+
+# INSERT_UPDATE ProcessDefinition; code[unique=true]           ; resource
+#                                ; customFulfillmentProcess    ; jar:com.example.constants.MyExtensionConstants&/myextension/processes/custom-process.xml
+
+# -----------------------------------------------
+# Test Process Instances (for development/testing only)
+# -----------------------------------------------
+# Create order process instances linked to existing orders.
+# The process engine will execute them based on the process definition.
+
+# INSERT_UPDATE OrderProcess; code[unique=true]                            ; processDefinitionName       ; order(code)
+#                           ; testFulfillment-order001-$currentTimestamp   ; customFulfillmentProcess    ; testOrder001

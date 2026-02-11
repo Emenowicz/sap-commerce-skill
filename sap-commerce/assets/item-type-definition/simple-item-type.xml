@@ -16,7 +16,7 @@
         <itemtype code="CustomerFeedback"
                   autocreate="true"
                   generate="true"
-                  jaloclass="com.company.jalo.CustomerFeedback">
+                  jaloclass="com.example.jalo.CustomerFeedback">
 
             <!-- Database deployment configuration -->
             <!-- typecode must be unique (10000-32767 for custom types) -->

@@ -117,7 +117,7 @@ CSRF_RESPONSE=$(curl -s -c $COOKIE_FILE -b $COOKIE_FILE \
     -u "$HAC_USER:$HAC_PASSWORD" \
     -k "$HAC_URL/console/scripting" 2>/dev/null)
 
-CSRF_TOKEN=$(echo "$CSRF_RESPONSE" | grep -oP 'name="_csrf"[^>]*value="\K[^"]+' | head -1)
+CSRF_TOKEN=$(echo "$CSRF_RESPONSE" | sed -n 's/.*name="_csrf"[^>]*value="\([^"]*\)".*/\1/p; s/.*value="\([^"]*\)"[^>]*name="_csrf".*/\1/p' | head -1)
 
 if [ -z "$CSRF_TOKEN" ]; then
     echo "Error: Could not obtain CSRF token. Check credentials and HAC URL."

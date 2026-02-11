@@ -141,7 +141,7 @@ public class ProductBasicPopulator implements Populator<ProductModel, ProductDat
 **Converter Configuration:**
 ```xml
 <bean id="productConverter" parent="abstractPopulatingConverter">
-    <property name="targetClass" value="com.company.data.ProductData"/>
+    <property name="targetClass" value="com.example.data.ProductData"/>
     <property name="populators">
         <list>
             <ref bean="productBasicPopulator"/>
@@ -163,20 +163,20 @@ Configure all components in `*-spring.xml` files.
 ```xml
 <!-- DAO Layer -->
 <alias name="defaultProductDAO" alias="productDAO"/>
-<bean id="defaultProductDAO" class="com.company.dao.impl.DefaultProductDAO">
+<bean id="defaultProductDAO" class="com.example.dao.impl.DefaultProductDAO">
     <property name="flexibleSearchService" ref="flexibleSearchService"/>
 </bean>
 
 <!-- Service Layer -->
 <alias name="defaultProductService" alias="productService"/>
-<bean id="defaultProductService" class="com.company.service.impl.DefaultProductService">
+<bean id="defaultProductService" class="com.example.service.impl.DefaultProductService">
     <property name="productDAO" ref="productDAO"/>
     <property name="modelService" ref="modelService"/>
 </bean>
 
 <!-- Facade Layer -->
 <alias name="defaultProductFacade" alias="productFacade"/>
-<bean id="defaultProductFacade" class="com.company.facade.impl.DefaultProductFacade">
+<bean id="defaultProductFacade" class="com.example.facade.impl.DefaultProductFacade">
     <property name="productService" ref="productService"/>
     <property name="productConverter" ref="productConverter"/>
 </bean>

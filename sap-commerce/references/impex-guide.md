@@ -182,7 +182,7 @@ INSERT_UPDATE Media;code[unique=true];$mediaContainer;mime[default='image/jpeg']
 ### Media from URL
 ```impex
 INSERT_UPDATE Media;code[unique=true];@media[translator=de.hybris.platform.impex.jalo.media.MediaDataTranslator];mime
-;logo;jar:com.company.setup&/images/logo.png;image/png
+;logo;jar:com.example.setup&/images/logo.png;image/png
 ```
 
 ### Assign to Product

@@ -29,6 +29,12 @@ Claude Code, Cursor, Cline, GitHub Copilot, Codex, Continue, Windsurf, Aider, Ge
 - **Spring Configuration** - Beans, AOP, events
 - **Data Modeling** - Products, orders, users, pricing
 - **Troubleshooting** - Common errors and solutions
+- **CronJobs & Task Engine** - Scheduled jobs, triggers, task runners
+- **Business Processes** - Order flows, return processes, workflow actions
+- **Solr Search** - Indexed types, facets, value providers, boost rules
+- **Promotions & Rule Engine** - Drools rules, coupons, custom actions
+- **Caching** - Region caches, Spring cache, cluster invalidation
+- **Backoffice** - Widget config, editors, search, wizards
 
 ### Code Templates
 - Complete extension boilerplate
@@ -38,6 +44,10 @@ Claude Code, Cursor, Cline, GitHub Copilot, Codex, Continue, Windsurf, Aider, Ge
 - FlexibleSearch queries
 - OCC REST API customization
 - Checkout flow extension
+- CronJob implementation and configuration
+- Business process definitions and actions
+- Solr search setup and custom value providers
+- Promotion rules and coupon setup
 
 ### Utility Scripts
 - `generate-extension.sh` - Scaffold new extensions
@@ -51,6 +61,12 @@ Claude Code, Cursor, Cline, GitHub Copilot, Codex, Continue, Windsurf, Aider, Ge
 | Deployment | Cloud (CCv2), On-Premise |
 | Project Types | B2C, B2B |
 | Integrations | Payment, ERP/SAP, Solr, CMS |
+| Background Jobs | CronJobs, Task Engine |
+| Workflows | Business Processes, Order/Return Flows |
+| Search | Solr Configuration, Facets, Indexing |
+| Marketing | Promotions, Coupons, Rule Engine |
+| Performance | Caching, Cache Regions, Monitoring |
+| Admin UI | Backoffice Configuration, Widgets |
 
 ## Usage
 
@@ -63,6 +79,11 @@ Once installed, your agent automatically activates this skill when you:
 - Customize OCC REST APIs
 - Work with FlexibleSearch queries
 - Extend B2C/B2B accelerators
+- Create CronJobs or scheduled tasks
+- Define business processes or order flows
+- Configure Solr search and indexing
+- Set up promotions and coupons
+- Customize Backoffice admin UI
 
 ### Examples
 
@@ -74,6 +95,10 @@ Once installed, your agent automatically activates this skill when you:
 > Implement a service layer for customer wishlists
 
 > How do I add a custom checkout step?
+
+> Create a CronJob that exports order data nightly
+
+> Configure Solr faceted search for product categories
 ```
 
 ## Structure
@@ -81,8 +106,8 @@ Once installed, your agent automatically activates this skill when you:
 ```
 sap-commerce/
 ├── SKILL.md              # Skill definition
-├── references/           # 10 detailed guides
-├── assets/               # 37 code templates
+├── references/           # 16 detailed guides
+├── assets/               # 51 code templates
 └── scripts/              # 3 utility scripts
 ```
 

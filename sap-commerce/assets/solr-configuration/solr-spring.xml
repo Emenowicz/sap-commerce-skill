@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--
+        Solr search Spring configuration.
+        Register custom value providers, query processors, and index interceptors.
+    -->
+
+    <!-- Custom value provider -->
+    <bean id="customValueProvider"
+          class="com.example.search.providers.CustomValueProvider"
+          parent="abstractPropertyFieldValueProvider"/>
+
+    <!--
+        Additional custom value providers can be registered here.
+        Each provider extracts field values from product models for Solr indexing.
+    -->
+
+    <!-- Example: Multi-valued category path provider -->
+    <!-- <bean id="categoryPathValueProvider"
+          class="com.example.search.providers.CategoryPathValueProvider"
+          parent="abstractPropertyFieldValueProvider">
+        <property name="categoryService" ref="categoryService"/>
+    </bean> -->
+
+    <!-- Example: Custom boost value provider for merchandising -->
+    <!-- <bean id="merchandisingBoostValueProvider"
+          class="com.example.search.providers.MerchandisingBoostValueProvider"
+          parent="abstractPropertyFieldValueProvider">
+        <property name="promotionService" ref="promotionService"/>
+    </bean> -->
+
+</beans>

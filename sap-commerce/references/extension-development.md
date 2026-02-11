@@ -24,7 +24,7 @@ customextension/
 │   └── localization/
 │       └── customextension-locales_en.properties
 ├── src/
-│   └── com/company/custom/
+│   └── com/example/custom/
 │       ├── constants/
 │       │   └── CustomextensionConstants.java
 │       ├── setup/
