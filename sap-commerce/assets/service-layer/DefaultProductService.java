@@ -3,17 +3,22 @@
  * Default implementation of ProductService.
  * Contains business logic, validation, and transaction management.
  */
-package com.company.core.services.impl;
+package com.example.core.services.impl;
 
-import com.company.core.daos.ProductDAO;
-import com.company.core.services.ProductService;
+import com.example.core.daos.ProductDAO;
+import com.example.core.services.ProductService;
 
 import de.hybris.platform.core.model.product.ProductModel;
+import de.hybris.platform.ordersplitting.model.StockLevelModel;
+import de.hybris.platform.ordersplitting.model.WarehouseModel;
 import de.hybris.platform.servicelayer.model.ModelService;
+import de.hybris.platform.stock.StockService;
+import de.hybris.platform.store.services.WarehouseService;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,6 +36,8 @@ public class DefaultProductService implements ProductService {
 
     private ProductDAO productDAO;
     private ModelService modelService;
+    private WarehouseService warehouseService;
+    private StockService stockService;
 
     @Override
     public ProductModel getProductForCode(final String code) {
@@ -69,9 +76,15 @@ public class DefaultProductService implements ProductService {
             throw new IllegalArgumentException("Product not found: " + productCode);
         }
 
-        // Update and persist via ModelService
-        product.setMinOrderQuantity(quantity > 0 ? 1 : null);
-        modelService.save(product);
+        // Update stock via StockLevelModel + WarehouseModel (correct SAP Commerce pattern)
+        final Collection<WarehouseModel> warehouses = warehouseService.getWarehouses();
+        final WarehouseModel warehouse = warehouses.iterator().next();
+
+        final StockLevelModel stockLevel = modelService.create(StockLevelModel.class);
+        stockLevel.setProductCode(product.getCode());
+        stockLevel.setWarehouse(warehouse);
+        stockLevel.setAvailable(quantity);
+        modelService.save(stockLevel);
     }
 
     @Override
@@ -82,7 +95,10 @@ public class DefaultProductService implements ProductService {
         if (product == null) {
             return false;
         }
-        return product.getMinOrderQuantity() != null && product.getMinOrderQuantity() > 0;
+
+        // Check stock via StockService — getTotalStockLevelAmount sums across all warehouses
+        final Long totalStock = stockService.getTotalStockLevelAmount(product);
+        return totalStock != null && totalStock > 0;
     }
 
     @Override
@@ -127,5 +143,13 @@ public class DefaultProductService implements ProductService {
 
     public void setModelService(final ModelService modelService) {
         this.modelService = modelService;
+    }
+
+    public void setWarehouseService(final WarehouseService warehouseService) {
+        this.warehouseService = warehouseService;
+    }
+
+    public void setStockService(final StockService stockService) {
+        this.stockService = stockService;
     }
 }
