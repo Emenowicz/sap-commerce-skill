@@ -1,6 +1,8 @@
-# SAP Commerce Skill for Claude Code
+# SAP Commerce Skill
 
-A comprehensive [Claude Code](https://claude.ai/code) skill for SAP Commerce Cloud (Hybris) development. Provides guidance, templates, and utilities for building e-commerce solutions.
+A comprehensive AI coding agent skill for SAP Commerce Cloud (Hybris) development. Provides guidance, templates, and utilities for building e-commerce solutions.
+
+Works with **35+ AI coding agents** including Claude Code, Cursor, Cline, GitHub Copilot, Windsurf, Codex, and more.
 
 ## Installation
 
@@ -8,11 +10,11 @@ A comprehensive [Claude Code](https://claude.ai/code) skill for SAP Commerce Clo
 npx skills add Emenowicz/sap-commerce-skill
 ```
 
-Or install globally:
+The CLI auto-detects which agents you have installed and configures the skill for all of them.
 
-```bash
-npx skills add Emenowicz/sap-commerce-skill -g
-```
+### Supported Agents
+
+Claude Code, Cursor, Cline, GitHub Copilot, Codex, Continue, Windsurf, Aider, Gemini, OpenCode, Augment, Zed, Kilo Code, Roo Code, Trae, and [many more](https://skills.sh).
 
 ## What's Included
 
@@ -52,7 +54,7 @@ npx skills add Emenowicz/sap-commerce-skill -g
 
 ## Usage
 
-Once installed, Claude Code automatically activates this skill when you:
+Once installed, your agent automatically activates this skill when you:
 
 - Ask to create SAP Commerce extensions
 - Need to define item types
@@ -94,6 +96,5 @@ Contributions welcome! Please open an issue or submit a PR.
 
 ## Related
 
-- [Claude Code Documentation](https://docs.anthropic.com/claude-code)
-- [SAP Commerce Cloud Help](https://help.sap.com/docs/SAP_COMMERCE_CLOUD)
 - [skills.sh](https://skills.sh) - Skills directory
+- [SAP Commerce Cloud Help](https://help.sap.com/docs/SAP_COMMERCE_CLOUD)
