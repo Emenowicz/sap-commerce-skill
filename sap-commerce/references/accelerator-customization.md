@@ -1,5 +1,7 @@
 # Accelerator Customization
 
+> **⚠️ Legacy Approach:** The JSP-based Accelerator storefront (Spring Web Flow, JSP/JSTL, AddOns) is the legacy frontend approach. For new projects, SAP recommends **Composable Storefront** (Spartacus/Angular), which communicates via OCC APIs and supports PWA, SSR, and headless deployments. See [composable-storefront.md](composable-storefront.md) for the modern approach. The Accelerator remains fully supported for existing projects.
+
 ## Table of Contents
 - [B2C Accelerator Architecture](#b2c-accelerator-architecture)
 - [B2B Accelerator Architecture](#b2b-accelerator-architecture)

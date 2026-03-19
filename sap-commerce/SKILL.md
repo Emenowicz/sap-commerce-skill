@@ -1,13 +1,15 @@
 ---
 name: sap-commerce
-description: Provides comprehensive SAP Commerce Cloud (formerly Hybris) development guidance including type system modeling, service layer architecture, data management with ImpEx and FlexibleSearch, OCC API customization, B2C/B2B accelerator patterns, CronJobs, business processes, Solr search, promotions, caching, and Backoffice configuration. Use when the user asks to "create SAP Commerce extensions", "define item types in items.xml", "write ImpEx scripts", "implement service layer components (facades/services/DAOs)", "customize OCC REST APIs", "work with FlexibleSearch queries", "customize B2C or B2B accelerators", "configure Spring beans", "create CronJobs or scheduled tasks", "define business processes or order flows", "configure Solr search or indexing", "set up promotions or coupons", "configure caching", "customize Backoffice", mentions "Hybris development" or "SAP Commerce Cloud platform", or asks about troubleshooting SAP Commerce issues.
+description: Provides comprehensive SAP Commerce Cloud (formerly Hybris) development guidance including type system modeling, service layer architecture, data management with ImpEx and FlexibleSearch, OCC API customization, Composable Storefront (Spartacus/Angular), B2C/B2B accelerator patterns, CCv2 cloud deployment, SAP BTP/Kyma integration, CronJobs, business processes, Solr search, promotions, caching, SmartEdit, Backoffice configuration, and testing patterns. Use when the user asks to "create SAP Commerce extensions", "define item types in items.xml", "write ImpEx scripts", "implement service layer components (facades/services/DAOs)", "customize OCC REST APIs", "work with FlexibleSearch queries", "customize B2C or B2B accelerators", "configure Spring beans", "create CronJobs or scheduled tasks", "define business processes or order flows", "configure Solr search or indexing", "set up promotions or coupons", "configure caching", "customize Backoffice", "integrate Composable Storefront or Spartacus", "customize Angular CMS components in Spartacus", "deploy to CCv2 or SAP Commerce Cloud public cloud", "configure manifest.json for CCv2", "integrate SAP BTP or Kyma microservices with SAP Commerce", "customize SmartEdit", "write unit or integration tests for SAP Commerce", mentions "Hybris development", "SAP Commerce Cloud platform", "CCv2", "OCC API", "SAP Spartacus", or asks about troubleshooting SAP Commerce issues.
 ---
 
 # SAP Commerce Development
 
 ## Overview
 
-SAP Commerce Cloud (formerly Hybris) is an enterprise e-commerce platform built on Java and Spring. This skill provides guidance for extension development, type system modeling, service layer implementation, data management, API customization, and accelerator patterns for both Cloud (CCv2) and On-Premise deployments.
+SAP Commerce Cloud (formerly Hybris) is an enterprise e-commerce platform built on Java and Spring. This skill provides guidance for extension development, type system modeling, service layer implementation, data management, API customization, accelerator patterns, Composable Storefront (Spartacus/Angular) integration, CCv2 cloud deployment, SAP BTP/Kyma integration, SmartEdit customization, and testing patterns for both Cloud (CCv2) and On-Premise deployments.
+
+> **Modern Storefront Note:** The JSP-based Accelerator storefront (Spring Web Flow, JSP/JSTL) is the legacy approach. The modern recommended storefront is **Composable Storefront** (formerly Spartacus) — an Angular/TypeScript Single Page Application that communicates with the backend exclusively via OCC REST APIs. New projects should use Composable Storefront. See [composable-storefront.md](references/composable-storefront.md).
 
 ## Core Architecture
 
@@ -27,8 +29,20 @@ Four-layer architecture: **Facade** (API for controllers) → **Service** (busin
 ### OCC API
 RESTful web services exposing commerce functionality. Controllers use `DataMapper` for DTO conversion. See [occ-api-development.md](references/occ-api-development.md).
 
-### Accelerators
-Pre-built storefronts: B2C (retail) and B2B (enterprise with approval workflows). See [accelerator-customization.md](references/accelerator-customization.md).
+### Accelerators (Legacy JSP Storefront)
+Pre-built JSP/Spring MVC storefronts: B2C (retail) and B2B (enterprise with approval workflows). **Legacy approach** — new projects should use Composable Storefront or a headless approach. See [accelerator-customization.md](references/accelerator-customization.md).
+
+### Composable Storefront (Spartacus)
+Angular/TypeScript SPA that replaces JSP accelerators. Communicates exclusively via OCC APIs. Supports PWA, SSR, and feature libraries for B2C/B2B. See [composable-storefront.md](references/composable-storefront.md).
+
+### Headless Commerce
+SAP Commerce Cloud as a headless backend — OCC APIs consumed by any frontend (React, Vue, mobile apps, etc.). The backend serves product, catalog, cart, order, and user data via REST. Composable Storefront is SAP's reference headless frontend, but custom frontends are supported.
+
+### CCv2 Cloud Deployment
+SAP Commerce Cloud v2 (CCv2) is the managed cloud offering. Deployment is driven by `manifest.json` defining extensions, aspects (storefront/api/backoffice), and properties. See [ccv2-deployment.md](references/ccv2-deployment.md).
+
+### SAP BTP Integration
+SAP Business Technology Platform integration via API Registry module and SAP BTP Extensions Integration Module (Kyma runtime). Allows microservices/serverless functions to react to Commerce events. See [sap-btp-integration.md](references/sap-btp-integration.md).
 
 ### CronJobs & Task Engine
 Scheduled and asynchronous job execution. Define `AbstractJobPerformable` implementations, configure via `ServicelayerJob` + `CronJob` + `Trigger` in ImpEx. See [cronjob-task-engine.md](references/cronjob-task-engine.md).
@@ -144,6 +158,42 @@ Reference: [solr-search-configuration.md](references/solr-search-configuration.m
 
 Reference: [promotions-rule-engine.md](references/promotions-rule-engine.md) | Templates: `assets/promotions/`
 
+### Integrate Composable Storefront (Spartacus)
+1. Set up OCC endpoints and CORS on the Commerce backend
+2. Scaffold Angular app: `ng add @spartacus/schematics@latest --base-url <OCC_URL> --base-site=<SITE_ID> --ssr`
+3. Configure `SpartacusConfigurationModule` with `provideConfig`
+4. Customize CMS components via `cmsComponents` mapping in `provideConfig`
+5. Override services by providing custom service classes in feature modules
+
+Reference: [composable-storefront.md](references/composable-storefront.md) | Templates: `assets/composable-storefront/`
+
+### Deploy to CCv2
+1. Configure `manifest.json` at repository root with `commerceSuiteVersion`, `extensions`, `aspects`
+2. Set environment properties in CCv2 Cloud Portal or property files
+3. Push to connected repository to trigger build
+4. Promote build through environments (dev → staging → production)
+
+Reference: [ccv2-deployment.md](references/ccv2-deployment.md)
+
+### Integrate SAP BTP / Kyma
+1. Configure API Registry module to expose Commerce APIs and events
+2. Connect Kyma runtime via SAP BTP Extensions Integration Module
+3. Implement microservices/lambdas to react to Commerce events
+4. Use API Registry for webhook-based outbound communication
+
+Reference: [sap-btp-integration.md](references/sap-btp-integration.md)
+
+### Write Tests for Custom Extension
+1. Annotate unit tests with `@UnitTest`, integration tests with `@IntegrationTest`
+2. Unit tests: use Mockito mocks, no Spring context, place in `testsrc/`
+3. Integration tests: extend `ServicelayerTest` or `ServicelayerTransactionalTest`
+4. OCC API integration tests: use REST Assured or MockMvc against a running OCC endpoint
+5. Load test data via `importCsv("/myext/test/testdata.impex", "utf-8")`
+6. Run locally: `ant unittests -Dtestclasses.extensions=myextension`
+7. Configure CCv2 test run in `manifest.json` under `"tests"`
+
+Reference: [testing-guide.md](references/testing-guide.md)
+
 ## Quick Reference
 
 | Task | Reference | Assets | Script |
@@ -154,7 +204,11 @@ Reference: [promotions-rule-engine.md](references/promotions-rule-engine.md) | T
 | Data import | [impex-guide.md](references/impex-guide.md) | `assets/impex-scripts/` | `scripts/validate-impex.sh` |
 | Queries | [flexiblesearch-reference.md](references/flexiblesearch-reference.md) | `assets/flexiblesearch-queries/` | `scripts/query-items.sh` |
 | API customization | [occ-api-development.md](references/occ-api-development.md) | `assets/occ-customization/` | - |
-| Checkout/Storefront | [accelerator-customization.md](references/accelerator-customization.md) | `assets/checkout-customization/` | - |
+| Checkout/Storefront (legacy) | [accelerator-customization.md](references/accelerator-customization.md) | `assets/checkout-customization/` | - |
+| Composable Storefront | [composable-storefront.md](references/composable-storefront.md) | `assets/composable-storefront/` | - |
+| CCv2 deployment | [ccv2-deployment.md](references/ccv2-deployment.md) | - | - |
+| SAP BTP/Kyma | [sap-btp-integration.md](references/sap-btp-integration.md) | - | - |
+| Testing | [testing-guide.md](references/testing-guide.md) | - | - |
 | Spring config | [spring-configuration.md](references/spring-configuration.md) | - | - |
 | Data patterns | [data-modeling-patterns.md](references/data-modeling-patterns.md) | - | - |
 | Troubleshooting | [troubleshooting-guide.md](references/troubleshooting-guide.md) | - | - |
