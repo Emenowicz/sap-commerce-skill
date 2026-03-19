@@ -104,7 +104,7 @@ Once installed, your agent automatically activates this skill when you:
 ## Structure
 
 ```
-sap-commerce/
+sap-commerce-cloud/
 ├── SKILL.md              # Skill definition
 ├── references/           # 16 detailed guides
 ├── assets/               # 51 code templates
