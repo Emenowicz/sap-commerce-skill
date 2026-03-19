@@ -320,9 +320,11 @@ public class CustomResourceController {
 </bean>
 ```
 
-## Swagger Documentation
+## Swagger / OpenAPI Documentation
 
-### Enable Swagger
+> **Note:** SAP Commerce 2211+ uses **OpenAPI 3.0** (Swagger 3). Earlier versions used Swagger 2. Annotations have changed from `@Api`/`@ApiOperation` (Swagger 2 / SpringFox) to `@Tag`/`@Operation` (OpenAPI 3 / SpringDoc). Check your Commerce version to use the correct annotation set.
+
+### Enable Swagger / OpenAPI UI
 In `local.properties`:
 ```properties
 commercewebservices.swagger.enabled=true
@@ -333,7 +335,7 @@ commercewebservices.swagger.enabled=true
 https://{host}/occ/v2/swagger-ui.html
 ```
 
-### Annotations
+### Annotations (Swagger 2 / SpringFox — pre-2205)
 ```java
 @Api(tags = "Products", description = "Product operations")
 @ApiOperation(value = "Get product", notes = "Returns product details")
@@ -342,12 +344,34 @@ https://{host}/occ/v2/swagger-ui.html
 @ApiResponse(code = 404, message = "Product not found")
 ```
 
+### Annotations (OpenAPI 3 / SpringDoc — 2205+)
+```java
+@Tag(name = "Products", description = "Product operations")
+@Operation(summary = "Get product", description = "Returns product details")
+@Parameter(description = "Product code", required = true)
+@ApiResponse(responseCode = "200", description = "Success")
+@ApiResponse(responseCode = "404", description = "Product not found")
+```
+
 ### Model Documentation
 ```java
-@ApiModel(value = "Product", description = "Product representation")
+@Schema(description = "Product representation")
 public class ProductWsDTO {
 
-    @ApiModelProperty(value = "Unique product code", required = true, example = "12345")
+    @Schema(description = "Unique product code", required = true, example = "12345")
     private String code;
 }
+```
+
+## CORS Configuration (for Composable Storefront / Headless)
+
+When Composable Storefront or any headless frontend calls OCC APIs from a different origin, configure CORS:
+
+```properties
+# local.properties or CCv2 api aspect properties
+corsfilter.commercewebservices.allowedOrigins=http://localhost:4200 https://yourstorefront.com
+corsfilter.commercewebservices.allowedMethods=GET HEAD OPTIONS PATCH PUT POST DELETE
+corsfilter.commercewebservices.allowedHeaders=origin content-type accept authorization cache-control if-none-match x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time
+corsfilter.commercewebservices.exposedHeaders=x-anonymous-consents
+corsfilter.commercewebservices.allowedCredentials=true
 ```
