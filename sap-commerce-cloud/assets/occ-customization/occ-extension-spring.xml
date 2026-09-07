@@ -14,44 +14,31 @@
     <!-- POPULATORS                       -->
     <!-- ================================ -->
 
-    <bean id="customProductPopulator"
+    <bean id="occCustomProductPopulator"
           class="com.example.populators.CustomProductPopulator"/>
-
-    <bean id="customProductPricePopulator"
-          class="com.example.populators.CustomProductPricePopulator">
-        <property name="priceDataFactory" ref="priceDataFactory"/>
-        <property name="commonI18NService" ref="commonI18NService"/>
-    </bean>
-
-    <bean id="customProductImagePopulator"
-          class="com.example.populators.CustomProductImagePopulator">
-        <property name="imageConverter" ref="imageConverter"/>
-    </bean>
 
     <!-- ================================ -->
     <!-- CONVERTERS                       -->
     <!-- ================================ -->
 
     <!-- Basic converter - minimal fields -->
-    <alias name="defaultBasicCustomProductConverter" alias="basicCustomProductConverter"/>
-    <bean id="defaultBasicCustomProductConverter" parent="abstractPopulatingConverter">
+    <alias name="defaultBasicOccCustomProductConverter" alias="basicOccCustomProductConverter"/>
+    <bean id="defaultBasicOccCustomProductConverter" parent="abstractPopulatingConverter">
         <property name="targetClass" value="com.example.dto.CustomProductWsDTO"/>
         <property name="populators">
             <list>
-                <ref bean="customProductPopulator"/>
+                <ref bean="occCustomProductPopulator"/>
             </list>
         </property>
     </bean>
 
-    <!-- Full converter - all fields -->
-    <alias name="defaultCustomProductConverter" alias="customProductConverter"/>
-    <bean id="defaultCustomProductConverter" parent="abstractPopulatingConverter">
+    <!-- Full converter - fields populated by the supplied example populator -->
+    <alias name="defaultOccCustomProductConverter" alias="occCustomProductConverter"/>
+    <bean id="defaultOccCustomProductConverter" parent="abstractPopulatingConverter">
         <property name="targetClass" value="com.example.dto.CustomProductWsDTO"/>
         <property name="populators">
             <list>
-                <ref bean="customProductPopulator"/>
-                <ref bean="customProductPricePopulator"/>
-                <ref bean="customProductImagePopulator"/>
+                <ref bean="occCustomProductPopulator"/>
             </list>
         </property>
     </bean>
@@ -66,8 +53,8 @@
         <property name="levelMapping">
             <map>
                 <entry key="BASIC" value="code,name"/>
-                <entry key="DEFAULT" value="code,name,description,price,stockStatus,purchasable"/>
-                <entry key="FULL" value="code,name,description,summary,url,price,stockStatus,stockLevel,purchasable,images,imageUrl,categoryCode,categoryName,brandName,averageRating,numberOfReviews,customField,customStatus"/>
+                <entry key="DEFAULT" value="code,name,description,stockStatus,purchasable"/>
+                <entry key="FULL" value="code,name,description,summary,url,stockStatus,stockLevel,purchasable,imageUrl,categoryCode,categoryName,brandName,averageRating,numberOfReviews,customField,customStatus"/>
             </map>
         </property>
     </bean>
@@ -83,30 +70,5 @@
             </map>
         </property>
     </bean>
-
-    <!-- ================================ -->
-    <!-- CONTROLLERS                      -->
-    <!-- ================================ -->
-
-    <bean id="customProductController"
-          class="com.example.controllers.CustomProductController">
-        <property name="customProductFacade" ref="customProductFacade"/>
-        <property name="dataMapper" ref="dataMapper"/>
-    </bean>
-
-    <!-- ================================ -->
-    <!-- VALIDATORS                       -->
-    <!-- ================================ -->
-
-    <bean id="customProductValidator"
-          class="com.example.validators.CustomProductValidator"/>
-
-    <!-- ================================ -->
-    <!-- EXCEPTION HANDLERS               -->
-    <!-- ================================ -->
-
-    <!-- Add custom exception handling -->
-    <bean id="customExceptionHandler"
-          class="com.example.handlers.CustomExceptionHandler"/>
 
 </beans>

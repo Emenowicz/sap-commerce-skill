@@ -65,14 +65,15 @@ public class DefaultProductFacade implements ProductFacade {
     }
 
     @Override
-    public void updateProductStock(final String productCode, final int quantity) {
+    public void updateProductStock(final String productCode, final String warehouseCode, final int quantity) {
         Assert.notNull(productCode, "Product code cannot be null");
+        Assert.notNull(warehouseCode, "Warehouse code cannot be null");
 
         if (quantity < 0) {
             throw new IllegalArgumentException("Stock quantity cannot be negative: " + quantity);
         }
 
-        productService.updateProductStock(productCode, quantity);
+        productService.updateProductStock(productCode, warehouseCode, quantity);
     }
 
     @Override

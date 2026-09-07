@@ -88,6 +88,24 @@ public class CustomCartPageController extends CartPageController {
 
 ## Checkout Flow Customization
 
+### Supplied checkout assets (2211-jdk21)
+
+The supplied `assets/checkout-customization/` example uses Accelerator MVC checkout steps.
+Merge `checkout-items.xml` into the core extension, rebuild, and update the type system.
+`customCheckoutOption` is persisted on `AbstractOrder`, so both Cart and Order have it.
+Verify a placed order retains the value through your project's clone/checkout strategy;
+custom strategies must copy the attribute if they exclude it from normal cloning.
+Test switching between two carts, a missing cart, an invalid option, and order placement.
+The example does not implement pricing or fulfillment of an option such as gift wrapping.
+
+Import `checkout-spring.xml` once into the storefront web context and include the controller
+package in its existing component scan. Do not also define an explicit controller bean.
+The registration inserts into the existing checkout step map; it does not replace the map.
+Adapt `defaultCheckoutGroup`, its validator, and the preceding/following steps to the project:
+route delivery-method's next transition to custom-step and payment's previous transition
+back to it, and add the step to the existing progress bar map. Create the referenced CMS
+page and localization entries. The prototype does not wire these project-specific beans.
+
 ### Spring Web Flow
 ```xml
 <!-- checkout-flow.xml -->

@@ -6,6 +6,7 @@
 package com.example.core.daos;
 
 import de.hybris.platform.core.model.product.ProductModel;
+import de.hybris.platform.catalog.model.CatalogVersionModel;
 import java.util.List;
 
 /**
@@ -19,20 +20,12 @@ import java.util.List;
 public interface ProductDAO {
 
     /**
-     * Find a product by its unique code.
-     * @param code the product code
-     * @return ProductModel or null if not found
-     */
-    ProductModel findByCode(String code);
-
-    /**
      * Find a product by code within a specific catalog version.
      * @param code the product code
-     * @param catalogId the catalog ID
-     * @param catalogVersionName the catalog version name
+     * @param catalogVersion the catalog version
      * @return ProductModel or null if not found
      */
-    ProductModel findByCodeAndCatalogVersion(String code, String catalogId, String catalogVersionName);
+    ProductModel findByCodeAndCatalogVersion(String code, CatalogVersionModel catalogVersion);
 
     /**
      * Search products by text in name or description.
@@ -61,5 +54,5 @@ public interface ProductDAO {
      * Count total products in the system.
      * @return total product count
      */
-    int countAllProducts();
+    long countAllProducts();
 }

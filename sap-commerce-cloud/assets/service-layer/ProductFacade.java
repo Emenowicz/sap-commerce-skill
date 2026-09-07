@@ -41,9 +41,10 @@ public interface ProductFacade {
     /**
      * Update product stock level.
      * @param productCode the product code
+     * @param warehouseCode warehouse whose stock should be updated
      * @param quantity new stock quantity
      */
-    void updateProductStock(String productCode, int quantity);
+    void updateProductStock(String productCode, String warehouseCode, int quantity);
 
     /**
      * Check if a product is available (in stock).

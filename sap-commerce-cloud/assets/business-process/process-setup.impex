@@ -8,7 +8,7 @@
 # (ProcessDefinitionResource). Use ImpEx only if Spring is not suitable.
 
 # INSERT_UPDATE ProcessDefinition; code[unique=true]           ; resource
-#                                ; customFulfillmentProcess    ; jar:com.example.constants.MyExtensionConstants&/myextension/processes/custom-process.xml
+#                                ; customOrderEntryValidationProcess    ; jar:com.example.constants.MyExtensionConstants&/myextension/processes/custom-process.xml
 
 # -----------------------------------------------
 # Test Process Instances (for development/testing only)
@@ -17,4 +17,4 @@
 # The process engine will execute them based on the process definition.
 
 # INSERT_UPDATE OrderProcess; code[unique=true]                            ; processDefinitionName       ; order(code)
-#                           ; testFulfillment-order001-$currentTimestamp   ; customFulfillmentProcess    ; testOrder001
+#                           ; testValidation-order001-$currentTimestamp   ; customOrderEntryValidationProcess    ; testOrder001

@@ -159,14 +159,11 @@ Check transaction isolation level. Avoid long-running transactions. Use `@Transa
 ## OCC API Errors
 
 ### 401 Unauthorized
-Verify OAuth client credentials. Check token endpoint:
+On `2211-jdk21`, verify that the `authorizationserver`, `resourceserver`, and `oauth2commons` extensions are configured. Check the token endpoint:
 ```
 POST /authorizationserver/oauth/token
 ```
-Ensure client is configured in ImpEx:
-```impex
-INSERT_UPDATE OAuthClientDetails;clientId[unique=true];...
-```
+Validate the `OAuthClientDetails` entry against the JDK 21 client rules: public browser clients use authorization code with PKCE and an absolute redirect URI; confidential machine clients may use client credentials and must have a secret. The password and implicit grants are not supported.
 
 ### 403 Forbidden
 Check user permissions and OAuth scopes. Verify `oauthauthorizations` configuration.

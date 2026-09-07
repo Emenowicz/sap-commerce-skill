@@ -1,5 +1,5 @@
 /*
- * CustomCheckoutStep.java
+ * CustomCheckoutStepController.java
  * Custom checkout step controller for accelerator checkout flow.
  */
 package com.example.storefront.controllers.pages.checkout.steps;
@@ -14,19 +14,20 @@ import de.hybris.platform.acceleratorstorefrontcommons.constants.WebConstants;
 import de.hybris.platform.acceleratorstorefrontcommons.controllers.pages.checkout.steps.AbstractCheckoutStepController;
 import de.hybris.platform.cms2.exceptions.CMSItemNotFoundException;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
+import jakarta.annotation.Resource;
 
 /**
  * Controller for custom checkout step.
- * Integrates with Spring Web Flow checkout process.
+ * Uses the Accelerator Spring MVC checkout steps.
  */
 @Controller
 @RequestMapping("/checkout/multi/custom-step")
@@ -50,10 +51,11 @@ public class CustomCheckoutStepController extends AbstractCheckoutStepController
             throws CMSItemNotFoundException {
 
         // Load existing data if available
-        final CustomStepForm form = new CustomStepForm();
-        form.setCustomOption(customCheckoutFacade.getSelectedCustomOption());
-
-        model.addAttribute("customStepForm", form);
+        if (!model.containsAttribute("customStepForm")) {
+            final CustomStepForm form = new CustomStepForm();
+            form.setCustomOption(customCheckoutFacade.getSelectedCustomOption());
+            model.addAttribute("customStepForm", form);
+        }
         model.addAttribute("customOptions", customCheckoutFacade.getAvailableOptions());
 
         // CMS page setup
@@ -71,7 +73,8 @@ public class CustomCheckoutStepController extends AbstractCheckoutStepController
      */
     @RequestMapping(method = RequestMethod.POST)
     @RequireHardLogIn
-    public String submitStep(@Valid final CustomStepForm form, final BindingResult bindingResult,
+    public String submitStep(@Valid @ModelAttribute("customStepForm") final CustomStepForm form,
+                             final BindingResult bindingResult,
                              final Model model, final RedirectAttributes redirectAttributes)
             throws CMSItemNotFoundException {
 
@@ -108,6 +111,11 @@ public class CustomCheckoutStepController extends AbstractCheckoutStepController
     }
 
     @Override
+    public String next(final RedirectAttributes redirectAttributes) {
+        // Navigation must not bypass saving and validating the option through POST.
+        return "redirect:/checkout/multi/custom-step";
+    }
+
     protected CheckoutStep getCheckoutStep() {
         return getCheckoutStep(CUSTOM_STEP);
     }

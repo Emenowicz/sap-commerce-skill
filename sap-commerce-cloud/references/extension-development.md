@@ -159,7 +159,7 @@ ant clean all
 ### manifest.json
 ```json
 {
-  "commerceSuiteVersion": "2211",
+  "commerceSuiteVersion": "2211-jdk21",
   "useConfig": {
     "properties": [
       {

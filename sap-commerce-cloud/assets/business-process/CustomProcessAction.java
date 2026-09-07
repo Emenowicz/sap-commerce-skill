@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Business process action template using AbstractSimpleDecisionAction.
+ * Checks only that the order exists and has entries. Does not fulfill orders.
  *
  * Returns OK or NOK transition based on the action's logic.
  * Register as a Spring bean with parent="abstractAction".
@@ -32,14 +32,6 @@ public class CustomProcessAction extends AbstractSimpleDecisionAction<OrderProce
         LOG.info("Processing order: {}", order.getCode());
 
         try {
-            // TODO: Replace with actual business logic
-            // Examples:
-            //   - Validate order entries
-            //   - Check payment authorization
-            //   - Reserve inventory
-            //   - Call external fulfillment API
-            //   - Send notification emails
-
             final boolean success = performAction(order);
 
             if (success) {
@@ -56,7 +48,6 @@ public class CustomProcessAction extends AbstractSimpleDecisionAction<OrderProce
     }
 
     private boolean performAction(final OrderModel order) {
-        // TODO: Implement action logic
-        return true;
+        return order.getEntries() != null && !order.getEntries().isEmpty();
     }
 }

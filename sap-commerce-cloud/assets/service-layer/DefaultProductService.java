@@ -9,16 +9,16 @@ import com.example.core.daos.ProductDAO;
 import com.example.core.services.ProductService;
 
 import de.hybris.platform.core.model.product.ProductModel;
+import de.hybris.platform.catalog.model.CatalogVersionModel;
 import de.hybris.platform.ordersplitting.model.StockLevelModel;
 import de.hybris.platform.ordersplitting.model.WarehouseModel;
+import de.hybris.platform.ordersplitting.WarehouseService;
 import de.hybris.platform.servicelayer.model.ModelService;
 import de.hybris.platform.stock.StockService;
-import de.hybris.platform.store.services.WarehouseService;
 
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +35,7 @@ import java.util.List;
 public class DefaultProductService implements ProductService {
 
     private ProductDAO productDAO;
+    private de.hybris.platform.product.ProductService platformProductService;
     private ModelService modelService;
     private WarehouseService warehouseService;
     private StockService stockService;
@@ -42,7 +43,7 @@ public class DefaultProductService implements ProductService {
     @Override
     public ProductModel getProductForCode(final String code) {
         Assert.notNull(code, "Product code cannot be null");
-        return productDAO.findByCode(code);
+        return platformProductService.getProductForCode(code);
     }
 
     @Override
@@ -63,52 +64,51 @@ public class DefaultProductService implements ProductService {
     @Override
     @Transactional
     // @Transactional ensures atomicity - place on service methods, not DAOs
-    public void updateProductStock(final String productCode, final int quantity) {
+    public void updateProductStock(final String productCode, final String warehouseCode, final int quantity) {
         Assert.notNull(productCode, "Product code cannot be null");
+        Assert.notNull(warehouseCode, "Warehouse code cannot be null");
 
         // Business validation
         if (quantity < 0) {
             throw new IllegalArgumentException("Stock quantity cannot be negative: " + quantity);
         }
 
-        final ProductModel product = productDAO.findByCode(productCode);
-        if (product == null) {
-            throw new IllegalArgumentException("Product not found: " + productCode);
+        final ProductModel product = platformProductService.getProductForCode(productCode);
+
+        final WarehouseModel warehouse = warehouseService.getWarehouseForCode(warehouseCode);
+        final StockLevelModel stockLevel = stockService.getStockLevel(product, warehouse);
+        if (stockLevel == null) {
+            final StockLevelModel newStockLevel = modelService.create(StockLevelModel.class);
+            newStockLevel.setProductCode(product.getCode());
+            newStockLevel.setWarehouse(warehouse);
+            newStockLevel.setAvailable(quantity);
+            modelService.save(newStockLevel);
+        } else {
+            stockService.updateActualStockLevel(product, warehouse, quantity, "Product stock update");
         }
-
-        // Update stock via StockLevelModel + WarehouseModel (correct SAP Commerce pattern)
-        final Collection<WarehouseModel> warehouses = warehouseService.getWarehouses();
-        final WarehouseModel warehouse = warehouses.iterator().next();
-
-        final StockLevelModel stockLevel = modelService.create(StockLevelModel.class);
-        stockLevel.setProductCode(product.getCode());
-        stockLevel.setWarehouse(warehouse);
-        stockLevel.setAvailable(quantity);
-        modelService.save(stockLevel);
     }
 
     @Override
     public boolean isProductInStock(final String productCode) {
         Assert.notNull(productCode, "Product code cannot be null");
 
-        final ProductModel product = productDAO.findByCode(productCode);
-        if (product == null) {
-            return false;
-        }
+        final ProductModel product = platformProductService.getProductForCode(productCode);
 
         // Check stock via StockService — getTotalStockLevelAmount sums across all warehouses
-        final Long totalStock = stockService.getTotalStockLevelAmount(product);
-        return totalStock != null && totalStock > 0;
+        return !stockService.getAllStockLevels(product).isEmpty()
+            && stockService.getTotalStockLevelAmount(product) > 0;
     }
 
     @Override
     @Transactional
-    public ProductModel createProduct(final String code, final String name, final String catalogVersionId) {
+    public ProductModel createProduct(final String code, final String name,
+            final CatalogVersionModel catalogVersion) {
         Assert.notNull(code, "Product code cannot be null");
         Assert.notNull(name, "Product name cannot be null");
+        Assert.notNull(catalogVersion, "Catalog version cannot be null");
 
         // Check if product already exists
-        final ProductModel existing = productDAO.findByCode(code);
+        final ProductModel existing = productDAO.findByCodeAndCatalogVersion(code, catalogVersion);
         if (existing != null) {
             throw new IllegalArgumentException("Product already exists with code: " + code);
         }
@@ -117,6 +117,7 @@ public class DefaultProductService implements ProductService {
         final ProductModel product = modelService.create(ProductModel.class);
         product.setCode(code);
         product.setName(name);
+        product.setCatalogVersion(catalogVersion);
 
         modelService.save(product);
         return product;
@@ -139,6 +140,11 @@ public class DefaultProductService implements ProductService {
     // Setter injection
     public void setProductDAO(final ProductDAO productDAO) {
         this.productDAO = productDAO;
+    }
+
+    public void setPlatformProductService(
+            final de.hybris.platform.product.ProductService platformProductService) {
+        this.platformProductService = platformProductService;
     }
 
     public void setModelService(final ModelService modelService) {

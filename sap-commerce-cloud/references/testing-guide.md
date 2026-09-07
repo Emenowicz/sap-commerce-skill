@@ -1,5 +1,26 @@
 # Testing Guide
 
+## Repository regression checks
+
+Run `bash tests/test-scripts.sh` from the repository root for the lightweight checks.
+These include missing example classes, duplicate Spring bean names, and controller stereotypes;
+they do not compile or boot the SAP platform.
+
+`tests/CheckoutRegistrationTest.java` executes the actual step-registration XML with Spring
+and verifies that existing delivery/payment entries survive adding the custom step.
+With JDK 21 and `SPRING_TEST_CLASSPATH` pointing to matching Spring 6 `spring-beans`,
+`spring-core`, and `spring-jcl` JARs, run:
+
+```bash
+java --class-path "$SPRING_TEST_CLASSPATH" tests/CheckoutRegistrationTest.java \
+  sap-commerce-cloud/assets/checkout-customization/checkout-spring.xml
+```
+
+In the SAP project, additionally verify cart option persistence after reload, isolation
+between carts, transfer to a placed order, rejected invalid options, and MVC mapping/form
+validation. Rebuild and update the type system after merging `checkout-items.xml`.
+Confirm that the unfinished cleanup job returns ERROR/ABORTED and its trigger is inactive.
+
 ## Table of Contents
 - [Overview](#overview)
 - [Test Annotations](#test-annotations)
@@ -114,7 +135,7 @@ import de.hybris.platform.servicelayer.model.ModelService;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -142,7 +163,9 @@ public class ProductDAOIntegrationTest extends ServicelayerTest {
         final String code = "TEST-PRODUCT-001";
 
         // When
-        final ProductModel product = productDAO.findByCode(code);
+        final CatalogVersionModel catalogVersion =
+            catalogVersionService.getCatalogVersion("testCatalog", "Online");
+        final ProductModel product = productDAO.findByCodeAndCatalogVersion(code, catalogVersion);
 
         // Then
         assertThat(product).isNotNull();
@@ -151,7 +174,10 @@ public class ProductDAOIntegrationTest extends ServicelayerTest {
 
     @Test
     public void findByCode_nonExistent_shouldReturnNull() {
-        final ProductModel product = productDAO.findByCode("NON-EXISTENT");
+        final CatalogVersionModel catalogVersion =
+            catalogVersionService.getCatalogVersion("testCatalog", "Online");
+        final ProductModel product =
+            productDAO.findByCodeAndCatalogVersion("NON-EXISTENT", catalogVersion);
         assertThat(product).isNull();
     }
 }
@@ -238,7 +264,7 @@ class DefaultProductFacadeSpec extends Specification {
 import de.hybris.bootstrap.annotations.IntegrationTest
 import de.hybris.platform.servicelayer.ServicelayerSpockSpecification
 
-import javax.annotation.Resource
+import jakarta.annotation.Resource;
 
 @IntegrationTest
 class ProductDAOSpec extends ServicelayerSpockSpecification {
@@ -246,13 +272,17 @@ class ProductDAOSpec extends ServicelayerSpockSpecification {
     @Resource
     ProductDAO productDAO
 
+    @Resource
+    CatalogVersionService catalogVersionService
+
     def setup() {
         importCsv("/myextension/test/testdata-products.impex", "utf-8")
     }
 
     def "findByCode returns product for existing code"() {
         when:
-        def product = productDAO.findByCode("TEST-PRODUCT-001")
+        def catalogVersion = catalogVersionService.getCatalogVersion("testCatalog", "Online")
+        def product = productDAO.findByCodeAndCatalogVersion("TEST-PRODUCT-001", catalogVersion)
 
         then:
         product != null
@@ -275,6 +305,12 @@ public class ProductServiceIntegrationTest extends ServicelayerTest {
     @Resource
     private ModelService modelService;
 
+    @Resource
+    private WarehouseService warehouseService;
+
+    @Resource
+    private StockService stockService;
+
     @Test
     public void updateProductStock_shouldPersistChange() {
         // Given
@@ -284,11 +320,12 @@ public class ProductServiceIntegrationTest extends ServicelayerTest {
         modelService.save(product);
 
         // When
-        productService.updateProductStock("STOCK-TEST", 50);
+        productService.updateProductStock("STOCK-TEST", "defaultWarehouse", 50);
 
         // Then
-        final ProductModel updated = productService.getProductForCode("STOCK-TEST");
-        assertThat(updated.getStockLevel()).isEqualTo(50);
+        final WarehouseModel warehouse = warehouseService.getWarehouseForCode("defaultWarehouse");
+        final StockLevelModel updated = stockService.getStockLevel(product, warehouse);
+        assertThat(updated.getAvailable()).isEqualTo(50);
     }
 }
 ```
@@ -353,7 +390,6 @@ public class ProductDAOIntegrationTest extends ServicelayerTransactionalTest {
 
 ```java
 import de.hybris.bootstrap.annotations.IntegrationTest;
-import de.hybris.platform.oauth2.constants.OAuth2Constants;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -393,8 +429,7 @@ import io.restassured.response.Response;
 Response tokenResponse = RestAssured.given()
     .contentType("application/x-www-form-urlencoded")
     .formParam("grant_type", "client_credentials")
-    .formParam("client_id", "mobile_android")
-    .formParam("client_secret", "secret")
+    .auth().preemptive().basic("<CONFIDENTIAL_CLIENT_ID>", "<CLIENT_SECRET>")
     .post("/authorizationserver/oauth/token");
 
 String token = tokenResponse.jsonPath().getString("access_token");

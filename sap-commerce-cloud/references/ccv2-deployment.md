@@ -26,9 +26,9 @@
 - Configuration split across aspects (storefront / api / backoffice)
 - No `localextensions.xml` — extensions listed in manifest.json
 
-### Supported Versions (2024)
-- 2211 (LTS — recommended)
-- 2105 (previous LTS)
+### Target Version
+- `2211-jdk21` — rolling latest release in the SAP Commerce 2211 JDK 21 line
+- Minimum baseline for this skill: `2211-jdk21.1`
 
 ## manifest.json Reference
 
@@ -36,7 +36,7 @@ The `manifest.json` file lives at the repository root and controls the entire bu
 
 ```json
 {
-  "commerceSuiteVersion": "2211",
+  "commerceSuiteVersion": "2211-jdk21",
 
   "useConfig": {
     "extensions": {
@@ -69,7 +69,9 @@ The `manifest.json` file lives at the repository root and controls the entire bu
   "extensions": [
     "commercewebservices",
     "acceleratorwebservices",
-    "oauth2",
+    "authorizationserver",
+    "resourceserver",
+    "oauth2commons",
     "backoffice",
     "yacceleratorstorefront",
     "myextension",
@@ -122,7 +124,7 @@ The `manifest.json` file lives at the repository root and controls the entire bu
           "value": "true"
         },
         {
-          "key": "corsfilter.commercewebservices.allowedOrigins",
+          "key": "corsfilter.commercewebservices.allowedOriginPatterns",
           "value": "https://yourstorefront.com"
         },
         {
@@ -132,6 +134,10 @@ The `manifest.json` file lives at the repository root and controls the entire bu
         {
           "key": "corsfilter.commercewebservices.allowedHeaders",
           "value": "origin content-type accept authorization cache-control if-none-match x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time"
+        },
+        {
+          "key": "corsfilter.commercewebservices.allowCredentials",
+          "value": "true"
         }
       ],
       "webapps": [
@@ -144,7 +150,7 @@ The `manifest.json` file lives at the repository root and controls the entire bu
           "contextPath": "/acceleratorwebservices"
         },
         {
-          "name": "oauth2",
+          "name": "authorizationserver",
           "contextPath": "/authorizationserver"
         }
       ]
@@ -175,7 +181,7 @@ Aspects define separate runtime pods with different configurations:
 | Aspect | Purpose | Typical Webapps |
 |--------|---------|-----------------|
 | `backoffice` | Admin UI, HAC | `backoffice`, `hac` |
-| `api` | OCC REST API (for Composable Storefront / headless) | `commercewebservices`, `oauth2` |
+| `api` | OCC REST API (for Composable Storefront / headless) | `commercewebservices`, `authorizationserver` |
 | `storefront` | JSP Accelerator storefront | `yacceleratorstorefront` |
 | `backgroundProcessing` | CronJobs, async jobs | No webapps |
 | `accstorefront` | Combined accelerator storefront | Multiple |
@@ -198,7 +204,7 @@ For projects using Composable Storefront or a custom frontend:
       "name": "api",
       "webapps": [
         { "name": "commercewebservices", "contextPath": "/occ" },
-        { "name": "oauth2", "contextPath": "/authorizationserver" }
+        { "name": "authorizationserver", "contextPath": "/authorizationserver" }
       ]
     }
   ]
@@ -254,12 +260,10 @@ storefront.sessiontoken.cookie.secure=true
 commercewebservices.swagger.enabled=false
 
 # CORS for Composable Storefront
-corsfilter.commercewebservices.allowedOrigins=https://yourstorefront.com
+corsfilter.commercewebservices.allowedOriginPatterns=https://yourstorefront.com
 corsfilter.commercewebservices.allowedMethods=GET HEAD OPTIONS PATCH PUT POST DELETE
 corsfilter.commercewebservices.allowedHeaders=origin content-type accept authorization cache-control if-none-match x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time
-
-# Auth
-sap.oauth2.anonymous.token.enabled=true
+corsfilter.commercewebservices.allowCredentials=true
 ```
 
 ### Inline Properties in manifest.json
@@ -270,7 +274,7 @@ sap.oauth2.anonymous.token.enabled=true
       "name": "api",
       "properties": [
         {
-          "key": "corsfilter.commercewebservices.allowedOrigins",
+          "key": "corsfilter.commercewebservices.allowedOriginPatterns",
           "value": "https://yourstorefront.com"
         }
       ]
@@ -470,8 +474,9 @@ db.pool.maxWait=30000
 - Check for duplicate typecodes across extensions
 
 ### CORS Errors from Composable Storefront
-- Verify `corsfilter.commercewebservices.allowedOrigins` includes the storefront URL
+- Verify `corsfilter.commercewebservices.allowedOriginPatterns` includes the storefront URL
 - Check `allowedHeaders` includes `x-anonymous-consents` and authorization headers
+- Set `corsfilter.commercewebservices.allowCredentials=true` when the storefront sends credentials
 - Ensure the CORS filter is on the `api` aspect
 
 ### Properties Not Taking Effect
@@ -480,5 +485,6 @@ db.pool.maxWait=30000
 - Check property key spelling — typos silently fail
 
 ### OCC Returns 401 for Anonymous Access
-- Enable anonymous token: `sap.oauth2.anonymous.token.enabled=true`
-- Verify OAuth client is configured with correct grants in ImpEx
+- Verify that `authorizationserver`, `resourceserver`, and `oauth2commons` are present in the JDK 21 setup.
+- For a browser client, use authorization code with PKCE and validate its absolute redirect URI.
+- Do not restore the removed password grant or legacy `sap.oauth2.anonymous.token.enabled` setting.

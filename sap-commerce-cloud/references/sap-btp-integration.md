@@ -337,7 +337,9 @@ odata2webservices.page.size.max=200
 
 ### OAuth Client for Kyma Callback
 
+For a confidential machine-to-machine integration, use the supported client credentials flow. Supply the real secret through your environment's secret-management process.
+
 ```impex
-INSERT_UPDATE OAuthClientDetails;clientId[unique=true];resourceIds;scope;authorizedGrantTypes;authorities;clientSecret
-;kyma_client;hybris;basic;authorization_code,refresh_token,password,client_credentials;ROLE_CLIENT;secret
+INSERT_UPDATE OAuthClientDetails;clientId[unique=true];scope;authorizedGrantTypes;authorities;clientSecret;public
+;kyma_client;basic;client_credentials;ROLE_TRUSTED_CLIENT;<CLIENT_SECRET>;false
 ```

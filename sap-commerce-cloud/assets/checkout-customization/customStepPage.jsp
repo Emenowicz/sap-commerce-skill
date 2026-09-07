@@ -40,22 +40,11 @@
                             <spring:theme code="checkout.multi.customStep.selectOption.placeholder"/>
                         </form:option>
                         <c:forEach items="${customOptions}" var="option">
-                            <form:option value="${option.code}">
-                                ${option.name}
-                            </form:option>
+                            <form:option value="${option}">${option}</form:option>
                         </c:forEach>
                     </form:select>
 
                     <form:errors path="customOption" cssClass="help-block text-danger"/>
-                </div>
-
-                <div class="form-group">
-                    <label for="customNotes">
-                        <spring:theme code="checkout.multi.customStep.notes" text="Additional Notes"/>
-                    </label>
-                    <form:textarea path="customNotes" id="customNotes"
-                                   class="form-control" rows="3"
-                                   placeholder="Optional notes..."/>
                 </div>
 
                 <%-- Navigation buttons --%>
