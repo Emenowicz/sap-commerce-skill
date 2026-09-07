@@ -31,6 +31,7 @@ echo ""
 ERRORS=0
 WARNINGS=0
 LINE_NUM=0
+HAVE_HEADER=false
 
 # Read file line by line
 while IFS= read -r line || [ -n "$line" ]; do
@@ -47,6 +48,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     if [[ "$line" =~ ^(INSERT|UPDATE|INSERT_UPDATE|REMOVE)[[:space:]] ]]; then
         # Valid operation header
         OPERATION=$(echo "$line" | grep -oE "^(INSERT|UPDATE|INSERT_UPDATE|REMOVE)")
+        HAVE_HEADER=true
 
         # Check for type declaration
         if [[ ! "$line" =~ ^(INSERT|UPDATE|INSERT_UPDATE|REMOVE)[[:space:]]+[A-Za-z] ]]; then
@@ -78,6 +80,11 @@ while IFS= read -r line || [ -n "$line" ]; do
 
     # 3. Check for data rows (start with ;)
     if [[ "$line" =~ ^[[:space:]]*\; ]]; then
+        if [ "$HAVE_HEADER" = false ]; then
+            echo -e "${RED}Line $LINE_NUM: Data row appears before an operation header${NC}"
+            ((ERRORS++))
+        fi
+
         # Count semicolons in data row
         SEMICOLONS=$(echo "$line" | tr -cd ';' | wc -c)
         if [ "$SEMICOLONS" -lt 2 ]; then
@@ -87,7 +94,7 @@ while IFS= read -r line || [ -n "$line" ]; do
     fi
 
     # 4. Check for undefined macros ($ without definition)
-    if [[ "$line" =~ \$[a-zA-Z_][a-zA-Z0-9_]* && ! "$line" =~ ^[[:space:]]*\$[a-zA-Z_][a-zA-Z0-9_]*= ]]; then
+    if [[ "$line" =~ \$[a-zA-Z_][a-zA-Z0-9_]* && ! "$line" =~ ^[[:space:]]*\$[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*= ]]; then
         MACROS=$(echo "$line" | grep -oE '\$[a-zA-Z_][a-zA-Z0-9_]*' | sort -u)
         # This is just a warning - macros might be defined elsewhere
         for macro in $MACROS; do
@@ -95,7 +102,7 @@ while IFS= read -r line || [ -n "$line" ]; do
             if [[ "$macro" =~ ^\$(config-|lang-|START_|END_) ]]; then
                 continue
             fi
-            if ! grep -q "^[[:space:]]*${macro}=" "$IMPEX_FILE"; then
+            if ! grep -q "^[[:space:]]*${macro}[[:space:]]*=" "$IMPEX_FILE"; then
                 echo -e "${YELLOW}Line $LINE_NUM: Macro $macro may not be defined in this file${NC}"
                 ((WARNINGS++))
             fi
@@ -114,6 +121,14 @@ while IFS= read -r line || [ -n "$line" ]; do
             echo -e "${YELLOW}Line $LINE_NUM: No [unique=true] attribute found - update may not match correctly${NC}"
             ((WARNINGS++))
         fi
+    fi
+
+    # 7. Reject content that is neither a header, data row, nor macro assignment.
+    if [[ ! "$line" =~ ^(INSERT|UPDATE|INSERT_UPDATE|REMOVE)[[:space:]] ]] \
+        && [[ ! "$line" =~ ^[[:space:]]*\; ]] \
+        && [[ ! "$line" =~ ^[[:space:]]*\$[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*= ]]; then
+        echo -e "${RED}Line $LINE_NUM: Unrecognized ImpEx syntax${NC}"
+        ((ERRORS++))
     fi
 
 done < "$IMPEX_FILE"

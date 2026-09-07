@@ -16,40 +16,6 @@
     <!-- Component scan for annotations -->
     <context:component-scan base-package="com.example.custom"/>
 
-    <!-- DAO Beans -->
-    <alias name="defaultCustomItemDAO" alias="customItemDAO"/>
-    <bean id="defaultCustomItemDAO" class="com.example.custom.daos.impl.DefaultCustomItemDAO">
-        <property name="flexibleSearchService" ref="flexibleSearchService"/>
-    </bean>
-
-    <!-- Service Beans -->
-    <alias name="defaultCustomItemService" alias="customItemService"/>
-    <bean id="defaultCustomItemService" class="com.example.custom.services.impl.DefaultCustomItemService">
-        <property name="customItemDAO" ref="customItemDAO"/>
-        <property name="modelService" ref="modelService"/>
-    </bean>
-
-    <!-- Populator Beans -->
-    <bean id="customItemPopulator" class="com.example.custom.populators.CustomItemPopulator"/>
-
-    <!-- Converter Beans -->
-    <alias name="defaultCustomItemConverter" alias="customItemConverter"/>
-    <bean id="defaultCustomItemConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.example.custom.data.CustomItemData"/>
-        <property name="populators">
-            <list>
-                <ref bean="customItemPopulator"/>
-            </list>
-        </property>
-    </bean>
-
-    <!-- Facade Beans -->
-    <alias name="defaultCustomItemFacade" alias="customItemFacade"/>
-    <bean id="defaultCustomItemFacade" class="com.example.custom.facades.impl.DefaultCustomItemFacade">
-        <property name="customItemService" ref="customItemService"/>
-        <property name="customItemConverter" ref="customItemConverter"/>
-    </bean>
-
     <!-- System Setup -->
     <bean id="customextensionSystemSetup" class="com.example.custom.setup.CustomextensionSystemSetup">
         <property name="modelService" ref="modelService"/>

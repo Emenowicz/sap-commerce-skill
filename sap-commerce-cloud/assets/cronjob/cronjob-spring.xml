@@ -19,11 +19,4 @@
         <!-- <property name="flexibleSearchService" ref="flexibleSearchService"/> -->
     </bean>
 
-    <!-- Typed CronJob using custom DataExportCronJobModel -->
-    <bean id="dataExportJobPerformable"
-          class="com.example.jobs.DataExportJobPerformable"
-          parent="abstractJobPerformable">
-        <!-- <property name="exportService" ref="exportService"/> -->
-    </bean>
-
 </beans>

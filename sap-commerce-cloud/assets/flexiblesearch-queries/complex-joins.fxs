@@ -4,7 +4,7 @@
 -- Products with stock levels across warehouses
 SELECT {p.pk}, {p.code}, {w.code}, {sl.available}
 FROM {Product AS p
-      JOIN StockLevel AS sl ON {p.pk} = {sl.product}
+      JOIN StockLevel AS sl ON {p.code} = {sl.productCode}
       JOIN Warehouse AS w ON {sl.warehouse} = {w.pk}}
 WHERE {sl.available} > 0
 ORDER BY {p.code}, {w.code}
@@ -29,7 +29,7 @@ ORDER BY {o.creationtime} DESC
 SELECT {p.pk}, {p.code}, {p.name}, {pr.price}, {pr.currency}, {sl.available}
 FROM {Product AS p
       LEFT JOIN PriceRow AS pr ON {p.pk} = {pr.product}
-      LEFT JOIN StockLevel AS sl ON {p.pk} = {sl.product}}
+      LEFT JOIN StockLevel AS sl ON {p.code} = {sl.productCode}}
 WHERE {p.catalogVersion} = ?catalogVersion
       AND ({pr.currency} = ?currency OR {pr.currency} IS NULL)
 ORDER BY {p.code}

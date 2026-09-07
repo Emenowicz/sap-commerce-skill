@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     checkout-spring.xml
-    Spring configuration for custom checkout beans.
+    Import once into the storefront web context. Its existing component scan
+    must include com.example.storefront.controllers; do not register the controller twice.
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -15,13 +16,12 @@
           class="com.example.facades.impl.DefaultCustomCheckoutFacade">
         <property name="cartService" ref="cartService"/>
         <property name="modelService" ref="modelService"/>
-        <property name="customOptionService" ref="customOptionService"/>
-    </bean>
-
-    <!-- Custom Checkout Step Controller -->
-    <bean id="customCheckoutStepController"
-          class="com.example.storefront.controllers.pages.checkout.steps.CustomCheckoutStepController">
-        <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
+        <property name="availableOptions">
+            <list>
+                <value>standard</value>
+                <value>gift-wrap</value>
+            </list>
+        </property>
     </bean>
 
     <!-- Checkout Step Configuration -->
@@ -32,6 +32,7 @@
         <property name="transitions">
             <map>
                 <entry key="previous" value="redirect:/checkout/multi/delivery-method"/>
+                <entry key="current" value="redirect:/checkout/multi/custom-step"/>
                 <entry key="next" value="redirect:/checkout/multi/payment-method"/>
             </map>
         </property>
@@ -41,30 +42,19 @@
     <!-- Register custom step in checkout group -->
     <bean id="customCheckoutGroupConfiguration"
           class="org.springframework.beans.factory.config.MethodInvokingBean">
-        <property name="targetObject" ref="defaultCheckoutGroup"/>
-        <property name="targetMethod" value="setCheckoutStepMap"/>
+        <property name="targetObject">
+            <bean class="org.springframework.beans.factory.config.PropertyPathFactoryBean">
+                <property name="targetObject" ref="defaultCheckoutGroup"/>
+                <property name="propertyPath" value="checkoutStepMap"/>
+            </bean>
+        </property>
+        <property name="targetMethod" value="put"/>
         <property name="arguments">
-            <map merge="true">
-                <entry key="custom-step" value-ref="customCheckoutStep"/>
-            </map>
+            <list>
+                <value>custom-step</value>
+                <ref bean="customCheckoutStep"/>
+            </list>
         </property>
     </bean>
-
-    <!-- Progress Bar Configuration -->
-    <bean id="customStepProgressBar"
-          class="de.hybris.platform.acceleratorstorefrontcommons.checkout.steps.CheckoutProgressBar">
-        <property name="id" value="customStep"/>
-        <property name="label" value="checkout.multi.customStep.title"/>
-    </bean>
-
-    <!-- Step Validator -->
-    <bean id="customCheckoutStepValidator"
-          class="com.example.storefront.validators.CustomCheckoutStepValidator">
-        <property name="customCheckoutFacade" ref="customCheckoutFacade"/>
-    </bean>
-
-    <!-- Form Validator -->
-    <bean id="customStepFormValidator"
-          class="com.example.storefront.validators.CustomStepFormValidator"/>
 
 </beans>

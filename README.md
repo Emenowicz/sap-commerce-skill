@@ -1,6 +1,8 @@
 # SAP Commerce Skill
 
-A comprehensive AI coding agent skill for SAP Commerce Cloud (Hybris) development. Provides guidance, templates, and utilities for building e-commerce solutions.
+A comprehensive AI coding agent skill targeting **SAP Commerce Cloud 2211-jdk21.1 or later** with **JDK 21, Spring 6, Jakarta APIs, and OpenAPI 3**.
+
+Older releases and the JSP Accelerator are covered only as explicitly marked legacy material.
 
 Works with **35+ AI coding agents** including Claude Code, Cursor, Cline, GitHub Copilot, Windsurf, Codex, and more.
 
@@ -22,6 +24,7 @@ Claude Code, Cursor, Cline, GitHub Copilot, Codex, Continue, Windsurf, Aider, Ge
 - **Type System** - items.xml, attributes, relations, enumerations
 - **Service Layer** - Facade/Service/DAO patterns, Spring DI
 - **Extension Development** - Structure, configuration, Cloud vs On-Premise
+- **JDK 21 Migration** - 2211-jdk21 baseline, Spring 6 and Jakarta migration
 - **ImpEx Guide** - Data import/export scripting
 - **FlexibleSearch** - Query syntax, joins, performance
 - **OCC API** - REST endpoints, DTOs, authentication
@@ -106,8 +109,8 @@ Once installed, your agent automatically activates this skill when you:
 ```
 sap-commerce-cloud/
 ├── SKILL.md              # Skill definition
-├── references/           # 16 detailed guides
-├── assets/               # 51 code templates
+├── references/           # 21 detailed guides
+├── assets/               # 58 code templates
 └── scripts/              # 3 utility scripts
 ```
 

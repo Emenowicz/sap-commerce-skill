@@ -1,6 +1,6 @@
 ---
 name: sap-commerce-cloud
-description: Provides comprehensive SAP Commerce Cloud (formerly Hybris) development guidance including type system modeling, service layer architecture, ImpEx data management, FlexibleSearch queries, OCC API customization, Composable Storefront (Spartacus/Angular), B2C/B2B accelerator patterns, WCMS content management, CCv2 cloud deployment, SAP BTP/Kyma integration, CronJobs, business processes, Solr search, promotions, caching, SmartEdit, Backoffice configuration, and testing patterns. Use when the user asks about "SAP Commerce Cloud", "SAP Commerce", "Hybris", "create SAP Commerce extensions", "define item types in items.xml", "write ImpEx scripts", "implement facades/services/DAOs", "customize OCC REST APIs", "work with FlexibleSearch queries", "customize B2C or B2B accelerators", "SAP Commerce B2B", "configure Spring beans", "create CronJobs or scheduled tasks", "define business processes or order flows", "configure Solr search or indexing", "set up promotions or coupons", "configure caching", "customize Backoffice", "SAP Commerce WCMS", "SAP Commerce CMS", "SAP Commerce integration", "integrate Composable Storefront or Spartacus", "customize Angular CMS components in Spartacus", "deploy to CCv2 or SAP Commerce Cloud public cloud", "configure manifest.json for CCv2", "integrate SAP BTP or Kyma with SAP Commerce", "customize SmartEdit", "write unit or integration tests for SAP Commerce", or asks about troubleshooting SAP Commerce issues.
+description: Develop, review, migrate, and troubleshoot SAP Commerce Cloud extensions on the 2211-jdk21 line. Use for type-system, service-layer, ImpEx, FlexibleSearch, OCC, storefront, CCv2, integration, indexing, process, promotion, and upgrade work. Treat Accelerator/JSP material as legacy.
 ---
 
 # SAP Commerce Development
@@ -8,6 +8,8 @@ description: Provides comprehensive SAP Commerce Cloud (formerly Hybris) develop
 ## Overview
 
 SAP Commerce Cloud (formerly Hybris) is an enterprise e-commerce platform built on Java and Spring. This skill provides guidance for extension development, type system modeling, service layer implementation, data management, API customization, accelerator patterns, Composable Storefront (Spartacus/Angular) integration, CCv2 cloud deployment, SAP BTP/Kyma integration, SmartEdit customization, and testing patterns for both Cloud (CCv2) and On-Premise deployments.
+
+> **Platform baseline:** Examples target **SAP Commerce Cloud 2211-jdk21.1 or later**, using **JDK 21, Spring 6, Jakarta APIs, and OpenAPI 3**. Use `commerceSuiteVersion: "2211-jdk21"` in CCv2 to follow the latest update in that line. See [jdk21-migration.md](references/jdk21-migration.md).
 
 > **Modern Storefront Note:** The JSP-based Accelerator storefront (Spring Web Flow, JSP/JSTL) is the legacy approach. The modern recommended storefront is **Composable Storefront** (formerly Spartacus) — an Angular/TypeScript Single Page Application that communicates with the backend exclusively via OCC REST APIs. New projects should use Composable Storefront. See [composable-storefront.md](references/composable-storefront.md).
 
@@ -160,10 +162,11 @@ Reference: [promotions-rule-engine.md](references/promotions-rule-engine.md) | T
 
 ### Integrate Composable Storefront (Spartacus)
 1. Set up OCC endpoints and CORS on the Commerce backend
-2. Scaffold Angular app: `ng add @spartacus/schematics@latest --base-url <OCC_URL> --base-site=<SITE_ID> --ssr`
-3. Configure `SpartacusConfigurationModule` with `provideConfig`
-4. Customize CMS components via `cmsComponents` mapping in `provideConfig`
-5. Override services by providing custom service classes in feature modules
+2. Select a Composable Storefront version from SAP's compatibility matrix
+3. Scaffold Angular app: `ng add @spartacus/schematics@<COMPATIBLE_VERSION> --base-url <OCC_URL> --base-site=<SITE_ID> --ssr`
+4. Configure `SpartacusConfigurationModule` with `provideConfig`
+5. Customize CMS components via `cmsComponents` mapping in `provideConfig`
+6. Override services by providing custom service classes in feature modules
 
 Reference: [composable-storefront.md](references/composable-storefront.md) | Templates: `assets/composable-storefront/`
 
@@ -208,6 +211,7 @@ Reference: [testing-guide.md](references/testing-guide.md)
 | Composable Storefront | [composable-storefront.md](references/composable-storefront.md) | `assets/composable-storefront/` | - |
 | CCv2 deployment | [ccv2-deployment.md](references/ccv2-deployment.md) | - | - |
 | SAP BTP/Kyma | [sap-btp-integration.md](references/sap-btp-integration.md) | - | - |
+| JDK 21 migration | [jdk21-migration.md](references/jdk21-migration.md) | - | - |
 | Testing | [testing-guide.md](references/testing-guide.md) | - | - |
 | Spring config | [spring-configuration.md](references/spring-configuration.md) | - | - |
 | Data patterns | [data-modeling-patterns.md](references/data-modeling-patterns.md) | - | - |
@@ -231,4 +235,4 @@ Utility scripts for common tasks:
 Detailed guides for each topic area. Load as needed for in-depth information.
 
 ### assets/
-Production-quality code templates ready to copy and customize. Organized by domain (service-layer, impex-scripts, etc.).
+Focused reference templates organized by domain. Copy only the files relevant to the task, replace `com.example` packages, and adapt project-specific business rules before production use.

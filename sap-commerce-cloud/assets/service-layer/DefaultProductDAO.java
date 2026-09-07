@@ -8,6 +8,7 @@ package com.example.core.daos.impl;
 import com.example.core.daos.ProductDAO;
 
 import de.hybris.platform.core.model.product.ProductModel;
+import de.hybris.platform.catalog.model.CatalogVersionModel;
 import de.hybris.platform.servicelayer.search.FlexibleSearchQuery;
 import de.hybris.platform.servicelayer.search.FlexibleSearchService;
 import de.hybris.platform.servicelayer.search.SearchResult;
@@ -35,34 +36,15 @@ public class DefaultProductDAO implements ProductDAO {
     private FlexibleSearchService flexibleSearchService;
 
     @Override
-    public ProductModel findByCode(final String code) {
-        // Basic query: SELECT pk WHERE code matches
-        final String queryString = "SELECT {pk} FROM {Product} WHERE {code} = ?code";
-
-        final FlexibleSearchQuery query = new FlexibleSearchQuery(queryString);
-        query.addQueryParameter("code", code);
-        query.setResultClassList(Collections.singletonList(ProductModel.class));
-
-        final SearchResult<ProductModel> result = flexibleSearchService.search(query);
-        return result.getResult().isEmpty() ? null : result.getResult().get(0);
-    }
-
-    @Override
-    public ProductModel findByCodeAndCatalogVersion(final String code, final String catalogId,
-            final String catalogVersionName) {
-        // JOIN query: Product joined with CatalogVersion
+    public ProductModel findByCodeAndCatalogVersion(
+            final String code, final CatalogVersionModel catalogVersion) {
         final String queryString =
-            "SELECT {p.pk} FROM {Product AS p " +
-            "JOIN CatalogVersion AS cv ON {p.catalogVersion} = {cv.pk} " +
-            "JOIN Catalog AS c ON {cv.catalog} = {c.pk}} " +
-            "WHERE {p.code} = ?code " +
-            "AND {c.id} = ?catalogId " +
-            "AND {cv.version} = ?versionName";
+            "SELECT {pk} FROM {Product} " +
+            "WHERE {code} = ?code AND {catalogVersion} = ?catalogVersion";
 
         final FlexibleSearchQuery query = new FlexibleSearchQuery(queryString);
         query.addQueryParameter("code", code);
-        query.addQueryParameter("catalogId", catalogId);
-        query.addQueryParameter("versionName", catalogVersionName);
+        query.addQueryParameter("catalogVersion", catalogVersion);
 
         final SearchResult<ProductModel> result = flexibleSearchService.search(query);
         return result.getResult().isEmpty() ? null : result.getResult().get(0);
@@ -107,8 +89,8 @@ public class DefaultProductDAO implements ProductDAO {
     public List<ProductModel> findLowStockProducts(final int threshold) {
         // Join with StockLevel
         final String queryString =
-            "SELECT {p.pk} FROM {Product AS p " +
-            "JOIN StockLevel AS sl ON {p.pk} = {sl.product}} " +
+            "SELECT DISTINCT {p.pk} FROM {Product AS p " +
+            "JOIN StockLevel AS sl ON {p.code} = {sl.productCode}} " +
             "WHERE {sl.available} < ?threshold AND {sl.available} > 0";
 
         final FlexibleSearchQuery query = new FlexibleSearchQuery(queryString);
@@ -119,15 +101,15 @@ public class DefaultProductDAO implements ProductDAO {
     }
 
     @Override
-    public int countAllProducts() {
+    public long countAllProducts() {
         // COUNT query
         final String queryString = "SELECT COUNT({pk}) FROM {Product}";
 
         final FlexibleSearchQuery query = new FlexibleSearchQuery(queryString);
-        query.setResultClassList(Collections.singletonList(Integer.class));
+        query.setResultClassList(Collections.singletonList(Long.class));
 
-        final SearchResult<Integer> result = flexibleSearchService.search(query);
-        return result.getResult().isEmpty() ? 0 : result.getResult().get(0);
+        final SearchResult<Long> result = flexibleSearchService.search(query);
+        return result.getResult().isEmpty() ? 0L : result.getResult().get(0).longValue();
     }
 
     // Setter injection

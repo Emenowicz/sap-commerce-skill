@@ -33,7 +33,7 @@ https://{host}/occ/v2/{baseSiteId}/{resource}
 ```java
 @Controller
 @RequestMapping("/{baseSiteId}/products")
-@Api(tags = "Products")
+@Tag(name = "Products")
 public class ProductController {
 
     @Resource
@@ -41,7 +41,7 @@ public class ProductController {
 
     @RequestMapping(value = "/{productCode}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get product details")
+    @Operation(summary = "Get product details")
     public ProductWsDTO getProduct(
             @PathVariable String baseSiteId,
             @PathVariable String productCode,
@@ -57,22 +57,22 @@ public class ProductController {
 - `@Controller`: Spring MVC controller
 - `@RequestMapping`: URL mapping
 - `@ResponseBody`: Return JSON/XML
-- `@Api`, `@ApiOperation`: Swagger docs
+- `@Tag`, `@Operation`: OpenAPI 3 documentation
 
 ## DTO Mapping
 
 ### WsDTO Definition
 ```java
-@ApiModel(value = "Product")
+@Schema(name = "Product")
 public class ProductWsDTO {
 
-    @ApiModelProperty(value = "Product code", required = true)
+    @Schema(description = "Product code", requiredMode = Schema.RequiredMode.REQUIRED)
     private String code;
 
-    @ApiModelProperty(value = "Product name")
+    @Schema(description = "Product name")
     private String name;
 
-    @ApiModelProperty(value = "Price information")
+    @Schema(description = "Price information")
     private PriceWsDTO price;
 
     // Getters and setters
@@ -140,14 +140,15 @@ public CartWsDTO createCart(
 ## Authentication and Authorization
 
 ### OAuth2 Configuration
-OCC uses OAuth2 for authentication.
+On `2211-jdk21`, OCC uses the Spring-based `authorizationserver`, `resourceserver`, and `oauth2commons` extensions. The password and implicit grants from the old `oauth2` extension are not supported.
 
-**Token Endpoint:**
+Browser clients should use authorization code with PKCE. Confidential machine clients can use client credentials:
 ```
 POST /authorizationserver/oauth/token
 Content-Type: application/x-www-form-urlencoded
+Authorization: Basic <base64(client_id:client_secret)>
 
-grant_type=password&client_id=mobile_android&client_secret=secret&username=user&password=pass
+grant_type=client_credentials
 ```
 
 ### Secure Endpoints
@@ -264,7 +265,7 @@ public StockWsDTO getProductAvailability(
 ```java
 @Controller
 @RequestMapping("/{baseSiteId}/customresource")
-@Api(tags = "Custom Resource")
+@Tag(name = "Custom Resource")
 public class CustomResourceController {
 
     @Resource
@@ -275,7 +276,7 @@ public class CustomResourceController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(value = "Get custom resources")
+    @Operation(summary = "Get custom resources")
     public CustomResourceListWsDTO getResources(
             @PathVariable String baseSiteId,
             @RequestParam(defaultValue = "DEFAULT") String fields) {
@@ -322,7 +323,7 @@ public class CustomResourceController {
 
 ## Swagger / OpenAPI Documentation
 
-> **Note:** SAP Commerce 2211+ uses **OpenAPI 3.0** (Swagger 3). Earlier versions used Swagger 2. Annotations have changed from `@Api`/`@ApiOperation` (Swagger 2 / SpringFox) to `@Tag`/`@Operation` (OpenAPI 3 / SpringDoc). Check your Commerce version to use the correct annotation set.
+SAP Commerce `2211-jdk21` examples use **OpenAPI 3** annotations from `io.swagger.v3.oas.annotations`.
 
 ### Enable Swagger / OpenAPI UI
 In `local.properties`:
@@ -335,16 +336,7 @@ commercewebservices.swagger.enabled=true
 https://{host}/occ/v2/swagger-ui.html
 ```
 
-### Annotations (Swagger 2 / SpringFox — pre-2205)
-```java
-@Api(tags = "Products", description = "Product operations")
-@ApiOperation(value = "Get product", notes = "Returns product details")
-@ApiParam(value = "Product code", required = true)
-@ApiResponse(code = 200, message = "Success")
-@ApiResponse(code = 404, message = "Product not found")
-```
-
-### Annotations (OpenAPI 3 / SpringDoc — 2205+)
+### OpenAPI 3 Annotations
 ```java
 @Tag(name = "Products", description = "Product operations")
 @Operation(summary = "Get product", description = "Returns product details")
@@ -358,7 +350,7 @@ https://{host}/occ/v2/swagger-ui.html
 @Schema(description = "Product representation")
 public class ProductWsDTO {
 
-    @Schema(description = "Unique product code", required = true, example = "12345")
+    @Schema(description = "Unique product code", requiredMode = Schema.RequiredMode.REQUIRED, example = "12345")
     private String code;
 }
 ```
@@ -369,9 +361,9 @@ When Composable Storefront or any headless frontend calls OCC APIs from a differ
 
 ```properties
 # local.properties or CCv2 api aspect properties
-corsfilter.commercewebservices.allowedOrigins=http://localhost:4200 https://yourstorefront.com
+corsfilter.commercewebservices.allowedOriginPatterns=http://localhost:4200 https://yourstorefront.com
 corsfilter.commercewebservices.allowedMethods=GET HEAD OPTIONS PATCH PUT POST DELETE
 corsfilter.commercewebservices.allowedHeaders=origin content-type accept authorization cache-control if-none-match x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time
 corsfilter.commercewebservices.exposedHeaders=x-anonymous-consents
-corsfilter.commercewebservices.allowedCredentials=true
+corsfilter.commercewebservices.allowCredentials=true
 ```

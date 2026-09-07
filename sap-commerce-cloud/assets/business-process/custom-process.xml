@@ -12,45 +12,17 @@
       - <split>/<join>: Parallel execution
 -->
 <process xmlns="http://www.hybris.de/xsd/processdefinition"
-         name="customFulfillmentProcess"
+         name="customOrderEntryValidationProcess"
+         processClass="de.hybris.platform.orderprocessing.model.OrderProcessModel"
          start="validateOrder"
          onError="error">
 
-    <!-- Step 1: Validate the order -->
-    <action id="validateOrder" bean="validateOrderAction">
-        <transition name="OK" to="checkPayment"/>
-        <transition name="NOK" to="error"/>
-    </action>
-
-    <!-- Step 2: Check payment status -->
-    <action id="checkPayment" bean="checkPaymentAction">
-        <transition name="OK" to="allocateStock"/>
-        <transition name="NOK" to="waitForPayment"/>
-    </action>
-
-    <!-- Wait for external payment confirmation -->
-    <wait id="waitForPayment" then="checkPayment" prependProcessCode="true">
-        <event>PaymentConfirmed</event>
-    </wait>
-
-    <!-- Step 3: Allocate stock for order entries -->
-    <action id="allocateStock" bean="allocateStockAction">
-        <transition name="OK" to="sendConfirmation"/>
-        <transition name="NOK" to="waitForStock"/>
-    </action>
-
-    <!-- Wait for stock availability -->
-    <wait id="waitForStock" then="allocateStock" prependProcessCode="true">
-        <event>StockAvailable</event>
-    </wait>
-
-    <!-- Step 4: Send order confirmation email -->
-    <action id="sendConfirmation" bean="sendConfirmationEmailAction">
+    <action id="validateOrder" bean="customProcessAction">
         <transition name="OK" to="success"/>
         <transition name="NOK" to="error"/>
     </action>
 
     <!-- End states -->
-    <end id="success" state="SUCCEEDED">Order fulfilled successfully</end>
-    <end id="error" state="ERROR">Order fulfillment failed</end>
+    <end id="success" state="SUCCEEDED">Order exists and contains entries</end>
+    <end id="error" state="ERROR">Order entry validation failed</end>
 </process>

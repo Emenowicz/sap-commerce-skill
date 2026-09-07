@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Merge into your core extension's items.xml; rebuild and update the type system. -->
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="items.xsd">
+    <itemtypes>
+        <itemtype code="AbstractOrder" autocreate="false" generate="false">
+            <attributes>
+                <attribute qualifier="customCheckoutOption" type="java.lang.String">
+                    <modifiers optional="true"/>
+                    <persistence type="property"/>
+                </attribute>
+            </attributes>
+        </itemtype>
+    </itemtypes>
+</items>

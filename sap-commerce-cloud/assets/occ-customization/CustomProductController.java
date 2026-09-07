@@ -1,7 +1,7 @@
 /*
  * CustomProductController.java
  * REST controller for custom product endpoints.
- * Demonstrates OCC API patterns with Swagger documentation.
+ * Demonstrates SAP Commerce 2211-jdk21 OCC patterns with OpenAPI 3 documentation.
  */
 package com.example.controllers;
 
@@ -10,24 +10,25 @@ import com.example.dto.CustomProductListWsDTO;
 import com.example.facades.CustomProductFacade;
 import com.example.facades.data.CustomProductData;
 
-import de.hybris.platform.commercewebservicescommons.dto.product.ProductWsDTO;
 import de.hybris.platform.webservicescommons.mapping.DataMapper;
 import de.hybris.platform.webservicescommons.swagger.ApiBaseSiteIdParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import de.hybris.platform.servicelayer.exceptions.UnknownIdentifierException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/{baseSiteId}/customproducts")
-@Api(tags = "Custom Products")
+@Tag(name = "Custom Products")
 public class CustomProductController {
 
     @Resource
@@ -52,25 +53,25 @@ public class CustomProductController {
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(
-        value = "Get custom products",
-        notes = "Returns a list of custom products with pagination support"
+    @Operation(
+        summary = "Get custom products",
+        description = "Returns a list of custom products with pagination support"
     )
     @ApiBaseSiteIdParam
     public CustomProductListWsDTO getCustomProducts(
-            @ApiParam(value = "Base site identifier", required = true)
+            @Parameter(description = "Base site identifier", required = true)
             @PathVariable String baseSiteId,
 
-            @ApiParam(value = "Search query")
+            @Parameter(description = "Search query")
             @RequestParam(required = false) String query,
 
-            @ApiParam(value = "Current page number", defaultValue = "0")
+            @Parameter(description = "Current page number", example = "0")
             @RequestParam(defaultValue = "0") int currentPage,
 
-            @ApiParam(value = "Page size", defaultValue = "20")
+            @Parameter(description = "Page size", example = "20")
             @RequestParam(defaultValue = "20") int pageSize,
 
-            @ApiParam(value = "Response field level", defaultValue = "DEFAULT")
+            @Parameter(description = "Response field level", example = "DEFAULT")
             @RequestParam(defaultValue = "DEFAULT") String fields) {
 
         List<CustomProductData> products = customProductFacade.searchProducts(query, currentPage, pageSize);
@@ -87,22 +88,22 @@ public class CustomProductController {
      */
     @RequestMapping(value = "/{productCode}", method = RequestMethod.GET)
     @ResponseBody
-    @ApiOperation(
-        value = "Get custom product by code",
-        notes = "Returns detailed information about a specific custom product"
+    @Operation(
+        summary = "Get custom product by code",
+        description = "Returns detailed information about a specific custom product"
     )
     @ApiResponses({
-        @ApiResponse(code = 200, message = "Product found"),
-        @ApiResponse(code = 404, message = "Product not found")
+        @ApiResponse(responseCode = "200", description = "Product found"),
+        @ApiResponse(responseCode = "404", description = "Product not found")
     })
     public CustomProductWsDTO getCustomProduct(
-            @ApiParam(value = "Base site identifier", required = true)
+            @Parameter(description = "Base site identifier", required = true)
             @PathVariable String baseSiteId,
 
-            @ApiParam(value = "Product code", required = true)
+            @Parameter(description = "Product code", required = true)
             @PathVariable String productCode,
 
-            @ApiParam(value = "Response field level", defaultValue = "DEFAULT")
+            @Parameter(description = "Response field level", example = "DEFAULT")
             @RequestParam(defaultValue = "DEFAULT") String fields) {
 
         CustomProductData productData = customProductFacade.getProductForCode(productCode);
@@ -114,23 +115,27 @@ public class CustomProductController {
      * Create a new custom product.
      */
     @RequestMapping(method = RequestMethod.POST)
+    @Secured("ROLE_TRUSTED_CLIENT")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    @ApiOperation(
-        value = "Create custom product",
-        notes = "Creates a new custom product and returns the created resource"
+    @Operation(
+        summary = "Create custom product",
+        description = "Creates a new custom product and returns the created resource"
     )
     @ApiResponses({
-        @ApiResponse(code = 201, message = "Product created successfully"),
-        @ApiResponse(code = 400, message = "Invalid request data")
+        @ApiResponse(responseCode = "201", description = "Product created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid request data")
     })
     public CustomProductWsDTO createCustomProduct(
-            @ApiParam(value = "Base site identifier", required = true)
+            @Parameter(description = "Base site identifier", required = true)
             @PathVariable String baseSiteId,
 
-            @ApiParam(value = "Product data", required = true)
-            @RequestBody CustomProductWsDTO productDto) {
+            @Parameter(description = "Product data", required = true)
+            @Valid @RequestBody CustomProductWsDTO productDto) {
 
+        if (productDto.getCode() == null || productDto.getCode().isBlank()) {
+            throw new IllegalArgumentException("Product code is required");
+        }
         CustomProductData productData = dataMapper.map(productDto, CustomProductData.class);
         CustomProductData createdProduct = customProductFacade.createProduct(productData);
         return dataMapper.map(createdProduct, CustomProductWsDTO.class, "FULL");
@@ -141,15 +146,16 @@ public class CustomProductController {
      * Update existing custom product.
      */
     @RequestMapping(value = "/{productCode}", method = RequestMethod.PUT)
+    @Secured("ROLE_TRUSTED_CLIENT")
     @ResponseBody
-    @ApiOperation(
-        value = "Update custom product",
-        notes = "Updates an existing custom product"
+    @Operation(
+        summary = "Update custom product",
+        description = "Updates an existing custom product"
     )
     public CustomProductWsDTO updateCustomProduct(
             @PathVariable String baseSiteId,
             @PathVariable String productCode,
-            @RequestBody CustomProductWsDTO productDto) {
+            @Valid @RequestBody CustomProductWsDTO productDto) {
 
         CustomProductData productData = dataMapper.map(productDto, CustomProductData.class);
         productData.setCode(productCode);
@@ -162,8 +168,9 @@ public class CustomProductController {
      * Delete a custom product.
      */
     @RequestMapping(value = "/{productCode}", method = RequestMethod.DELETE)
+    @Secured("ROLE_TRUSTED_CLIENT")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiOperation(value = "Delete custom product")
+    @Operation(summary = "Delete custom product")
     public void deleteCustomProduct(
             @PathVariable String baseSiteId,
             @PathVariable String productCode) {

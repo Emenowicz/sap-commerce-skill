@@ -21,44 +21,14 @@ public class CustomJobPerformable extends AbstractJobPerformable<CronJobModel> {
 
     @Override
     public PerformResult perform(final CronJobModel cronJobModel) {
-        LOG.info("Starting job: {}", cronJobModel.getCode());
-
-        try {
-            int processed = 0;
-            int errors = 0;
-
-            // TODO: Replace with actual business logic
-            // Example: iterate over items and process them
-            // final List<ItemModel> items = fetchItemsToProcess();
-            // for (final ItemModel item : items) {
-            //     if (clearAbortRequestedIfNeeded(cronJobModel)) {
-            //         LOG.info("Job aborted by user request after processing {} items", processed);
-            //         return new PerformResult(CronJobResult.UNKNOWN, CronJobStatus.ABORTED);
-            //     }
-            //     try {
-            //         processItem(item);
-            //         processed++;
-            //     } catch (final Exception e) {
-            //         LOG.error("Error processing item {}", item.getPk(), e);
-            //         errors++;
-            //     }
-            // }
-
-            LOG.info("Job completed. Processed: {}, Errors: {}", processed, errors);
-
-            if (errors > 0) {
-                return new PerformResult(CronJobResult.WARNING, CronJobStatus.FINISHED);
-            }
-            return new PerformResult(CronJobResult.SUCCESS, CronJobStatus.FINISHED);
-
-        } catch (final Exception e) {
-            LOG.error("Job failed with unexpected error", e);
-            return new PerformResult(CronJobResult.ERROR, CronJobStatus.ABORTED);
-        }
+        LOG.error("Job {} has no cleanup implementation; no work was performed", cronJobModel.getCode());
+        // Implement and test the cleanup before enabling its trigger.
+        return new PerformResult(CronJobResult.ERROR, CronJobStatus.ABORTED);
     }
 
     @Override
     public boolean isAbortable() {
-        return true;
+        // Change to true only after the processing loop checks the abort flag.
+        return false;
     }
 }

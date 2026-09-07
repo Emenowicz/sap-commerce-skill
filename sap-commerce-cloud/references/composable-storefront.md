@@ -30,7 +30,7 @@ Key benefits over the JSP Accelerator:
 - Easier frontend team collaboration (no Java knowledge needed)
 - Supports headless commerce — any frontend can consume OCC APIs
 
-**Version alignment**: Composable Storefront releases track SAP Commerce versions. Use `@spartacus/*@latest` for the latest 2211.x release.
+**Version alignment**: Select the Composable Storefront release from SAP's compatibility matrix for your current `2211-jdk21.x` update. Do not use `@latest` in reproducible project setup.
 
 ## Architecture
 
@@ -90,27 +90,18 @@ Composable Storefront requires proper CORS configuration on the SAP Commerce bac
 
 ```properties
 # Allow Composable Storefront origin
-corsfilter.commercewebservices.allowedOrigins=http://localhost:4200 https://yourstorefront.com
+corsfilter.commercewebservices.allowedOriginPatterns=http://localhost:4200 https://yourstorefront.com
 corsfilter.commercewebservices.allowedMethods=GET HEAD OPTIONS PATCH PUT POST DELETE
 corsfilter.commercewebservices.allowedHeaders=origin content-type accept authorization cache-control if-none-match x-anonymous-consents x-profile-tag-debug x-consent-reference occ-personalization-id occ-personalization-time
+corsfilter.commercewebservices.allowCredentials=true
 
 # Media CORS
-corsfilter.mediacontroller.allowedOrigins=*
+corsfilter.mediacontroller.allowedOriginPatterns=*
 corsfilter.mediacontroller.allowedMethods=GET HEAD OPTIONS
 ```
 
-### OCC User Endpoint
-Ensure the user (guest/customer) endpoint is enabled:
-```properties
-# Allow anonymous cart access
-sap.oauth2.anonymous.token.enabled=true
-```
-
 ### OAuth2 Client for Spartacus
-```impex
-INSERT_UPDATE OAuthClientDetails;clientId[unique=true];resourceIds;scope;authorizedGrantTypes;authorities;clientSecret;registeredRedirectUri
-;mobile_android;hybris;basic;authorization_code,refresh_token,password,client_credentials;ROLE_CLIENT;secret;http://localhost:4200/
-```
+SAP Commerce `2211-jdk21` uses the OAuth replacement delivered with the framework update. Configure storefront clients and authorization flows according to the current `2211-jdk21.x` OAuth documentation; do not copy legacy password-grant `OAuthClientDetails` examples from older releases.
 
 ## Scaffolding a New App
 
@@ -120,7 +111,7 @@ ng new my-storefront --style=scss
 cd my-storefront
 
 # Add Spartacus schematics (recommended approach)
-ng add @spartacus/schematics@latest \
+ng add @spartacus/schematics@<COMPATIBLE_VERSION> \
   --base-url https://your-commerce-backend.com \
   --base-site=electronics-spa \
   --ssr
@@ -406,7 +397,7 @@ provideConfig({
 ## B2B Composable Storefront
 
 ```bash
-ng add @spartacus/schematics@latest --base-url ... --base-site=powertools-spa --ssr
+ng add @spartacus/schematics@<COMPATIBLE_VERSION> --base-url ... --base-site=powertools-spa --ssr
 # Then add B2B feature:
 ng add @spartacus/b2b
 ```
@@ -432,7 +423,7 @@ B2B features include: Organization management, Cost centers, Budgets, Order appr
 SSR improves SEO and initial page load. Enabled via Angular Universal:
 
 ```bash
-ng add @spartacus/schematics@latest --base-url ... --base-site=... --ssr
+ng add @spartacus/schematics@<COMPATIBLE_VERSION> --base-url ... --base-site=... --ssr
 ```
 
 This adds:

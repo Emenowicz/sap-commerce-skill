@@ -202,6 +202,8 @@ INSERT_UPDATE RuleActionDefinition; id[unique=true]           ; name[lang=en]   
 
 ### Custom Action Implementation
 
+The following requires a project-owned `LoyaltyPointsRAO` and downstream logic that consumes it. Do not return `true` until the result RAO has actually been updated.
+
 ```java
 package com.example.promotions.actions;
 

@@ -1,6 +1,5 @@
 package com.example.promotions.actions;
 
-import de.hybris.platform.ruleengineservices.rao.RuleEngineResultRAO;
 import de.hybris.platform.ruleengineservices.rule.evaluation.RuleActionContext;
 import de.hybris.platform.ruleengineservices.rule.evaluation.actions.AbstractRuleExecutableSupport;
 import de.hybris.platform.ruleengineservices.rule.evaluation.actions.RAOAction;
@@ -34,7 +33,7 @@ public class CustomPromotionAction extends AbstractRuleExecutableSupport impleme
             return false;
         }
 
-        LOG.info("Awarding {} loyalty points", points);
+        LOG.warn("Loyalty action is a scaffold and did not award {} points", points);
 
         // TODO: Replace with actual custom action logic
         // Example: Create a custom RAO (Rule Action Object) to carry the action result
@@ -48,6 +47,7 @@ public class CustomPromotionAction extends AbstractRuleExecutableSupport impleme
         // context.scheduleForUpdate(result);
         // context.insertFacts(loyaltyRAO);
 
-        return true;
+        // Never report a reward as applied until the project-specific RAO exists.
+        return false;
     }
 }

@@ -75,7 +75,7 @@ WHERE {c.code} = ?categoryCode
 ```sql
 SELECT {p.pk}, {s.available}
 FROM {Product AS p
-      LEFT JOIN StockLevel AS s ON {p.pk} = {s.product}}
+      LEFT JOIN StockLevel AS s ON {p.code} = {s.productCode}}
 WHERE {p.code} = ?code
 ```
 
@@ -92,10 +92,10 @@ WHERE {c.id} = ?catalogId AND {cv.version} = ?version
 
 ### IN Subquery
 ```sql
-SELECT {pk} FROM {Product}
-WHERE {pk} IN (
-    SELECT {product} FROM {StockLevel} WHERE {available} > 0
-)
+SELECT {p.pk} FROM {Product AS p}
+WHERE {p.code} IN ({{
+    SELECT {sl.productCode} FROM {StockLevel AS sl} WHERE {sl.available} > 0
+}})
 ```
 
 ### EXISTS Subquery
@@ -274,9 +274,11 @@ WHERE {c.user} = ?user AND {c.code} = ?cartCode
 ### Low Stock Products
 ```sql
 SELECT {p.pk} FROM {Product AS p
-      JOIN StockLevel AS sl ON {p.pk} = {sl.product}}
+      JOIN StockLevel AS sl ON {p.code} = {sl.productCode}}
 WHERE {sl.available} < ?threshold AND {sl.available} > 0
 ```
+
+Stock levels use `productCode` and are global across catalog versions. Add a catalog-version condition when a query should return products from only one catalog version.
 
 ### Recent Orders
 ```sql

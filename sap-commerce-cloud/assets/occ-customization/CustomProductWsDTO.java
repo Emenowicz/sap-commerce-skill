@@ -1,15 +1,15 @@
 /*
  * CustomProductWsDTO.java
  * Web Service DTO for custom product API responses.
- * Uses Swagger annotations for API documentation.
+ * Uses OpenAPI 3 annotations for API documentation.
  */
 package com.example.dto;
 
 import de.hybris.platform.commercewebservicescommons.dto.product.PriceWsDTO;
 import de.hybris.platform.commercewebservicescommons.dto.product.ImageWsDTO;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 import java.util.List;
@@ -22,63 +22,64 @@ import java.util.List;
  * - DEFAULT: code, name, description, price
  * - FULL: all fields
  */
-@ApiModel(value = "CustomProduct", description = "Custom product representation")
+@Schema(name = "CustomProduct", description = "Custom product representation")
 public class CustomProductWsDTO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "Unique product code", required = true, example = "CUSTOM001")
+    @Schema(description = "Unique product code", requiredMode = Schema.RequiredMode.REQUIRED, example = "CUSTOM001")
     private String code;
 
-    @ApiModelProperty(value = "Product name", example = "Custom Product Name")
+    @Schema(description = "Product name", example = "Custom Product Name")
+    @NotBlank
     private String name;
 
-    @ApiModelProperty(value = "Product description")
+    @Schema(description = "Product description")
     private String description;
 
-    @ApiModelProperty(value = "Short summary")
+    @Schema(description = "Short summary")
     private String summary;
 
-    @ApiModelProperty(value = "Product URL")
+    @Schema(description = "Product URL")
     private String url;
 
-    @ApiModelProperty(value = "Price information")
+    @Schema(description = "Price information")
     private PriceWsDTO price;
 
-    @ApiModelProperty(value = "Stock availability status", example = "inStock")
+    @Schema(description = "Stock availability status", example = "inStock")
     private String stockStatus;
 
-    @ApiModelProperty(value = "Available stock quantity")
+    @Schema(description = "Available stock quantity")
     private Integer stockLevel;
 
-    @ApiModelProperty(value = "Whether product can be purchased")
+    @Schema(description = "Whether product can be purchased")
     private Boolean purchasable;
 
-    @ApiModelProperty(value = "Product images")
+    @Schema(description = "Product images")
     private List<ImageWsDTO> images;
 
-    @ApiModelProperty(value = "Primary image URL")
+    @Schema(description = "Primary image URL")
     private String imageUrl;
 
-    @ApiModelProperty(value = "Category code")
+    @Schema(description = "Category code")
     private String categoryCode;
 
-    @ApiModelProperty(value = "Category name")
+    @Schema(description = "Category name")
     private String categoryName;
 
-    @ApiModelProperty(value = "Brand name")
+    @Schema(description = "Brand name")
     private String brandName;
 
-    @ApiModelProperty(value = "Average customer rating", example = "4.5")
+    @Schema(description = "Average customer rating", example = "4.5")
     private Double averageRating;
 
-    @ApiModelProperty(value = "Number of customer reviews")
+    @Schema(description = "Number of customer reviews")
     private Integer numberOfReviews;
 
-    @ApiModelProperty(value = "Custom field specific to this product type")
+    @Schema(description = "Custom field specific to this product type")
     private String customField;
 
-    @ApiModelProperty(value = "Custom status")
+    @Schema(description = "Custom status")
     private String customStatus;
 
     // Getters and Setters

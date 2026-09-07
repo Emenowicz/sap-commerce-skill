@@ -20,8 +20,8 @@
         Alias pattern allows other extensions to override the implementation.
     -->
 
-    <alias name="defaultProductDAO" alias="productDAO"/>
-    <bean id="defaultProductDAO" class="com.example.core.daos.impl.DefaultProductDAO">
+    <alias name="defaultCustomProductDAO" alias="customProductDAO"/>
+    <bean id="defaultCustomProductDAO" class="com.example.core.daos.impl.DefaultProductDAO">
         <property name="flexibleSearchService" ref="flexibleSearchService"/>
     </bean>
 
@@ -31,10 +31,13 @@
         =====================================
     -->
 
-    <alias name="defaultProductService" alias="productService"/>
-    <bean id="defaultProductService" class="com.example.core.services.impl.DefaultProductService">
-        <property name="productDAO" ref="productDAO"/>
+    <alias name="defaultCustomProductService" alias="customProductService"/>
+    <bean id="defaultCustomProductService" class="com.example.core.services.impl.DefaultProductService">
+        <property name="productDAO" ref="customProductDAO"/>
+        <property name="platformProductService" ref="productService"/>
         <property name="modelService" ref="modelService"/>
+        <property name="warehouseService" ref="warehouseService"/>
+        <property name="stockService" ref="stockService"/>
     </bean>
 
     <!--
@@ -43,40 +46,14 @@
         =====================================
     -->
 
-    <!-- Basic Product Populator -->
-    <bean id="productBasicPopulator" class="com.example.facades.populators.ProductBasicPopulator"/>
+    <bean id="customProductPopulator" class="com.example.facades.populators.ProductPopulator"/>
 
-    <!-- Product Price Populator -->
-    <bean id="productPricePopulator" class="com.example.facades.populators.ProductPricePopulator">
-        <property name="priceService" ref="priceService"/>
-        <property name="commonI18NService" ref="commonI18NService"/>
-    </bean>
-
-    <!-- Product Stock Populator -->
-    <bean id="productStockPopulator" class="com.example.facades.populators.ProductStockPopulator">
-        <property name="stockService" ref="stockService"/>
-    </bean>
-
-    <!-- Basic Product Converter - minimal fields for list views -->
-    <alias name="defaultBasicProductConverter" alias="basicProductConverter"/>
-    <bean id="defaultBasicProductConverter" parent="abstractPopulatingConverter">
+    <alias name="defaultCustomProductConverter" alias="customProductConverter"/>
+    <bean id="defaultCustomProductConverter" parent="abstractPopulatingConverter">
         <property name="targetClass" value="com.example.facades.data.ProductData"/>
         <property name="populators">
             <list>
-                <ref bean="productBasicPopulator"/>
-            </list>
-        </property>
-    </bean>
-
-    <!-- Full Product Converter - all fields for detail views -->
-    <alias name="defaultProductConverter" alias="productConverter"/>
-    <bean id="defaultProductConverter" parent="abstractPopulatingConverter">
-        <property name="targetClass" value="com.example.facades.data.ProductData"/>
-        <property name="populators">
-            <list>
-                <ref bean="productBasicPopulator"/>
-                <ref bean="productPricePopulator"/>
-                <ref bean="productStockPopulator"/>
+                <ref bean="customProductPopulator"/>
             </list>
         </property>
     </bean>
@@ -87,10 +64,10 @@
         =====================================
     -->
 
-    <alias name="defaultProductFacade" alias="productFacade"/>
-    <bean id="defaultProductFacade" class="com.example.facades.impl.DefaultProductFacade">
-        <property name="productService" ref="productService"/>
-        <property name="productConverter" ref="productConverter"/>
+    <alias name="defaultExampleProductFacade" alias="exampleProductFacade"/>
+    <bean id="defaultExampleProductFacade" class="com.example.facades.impl.DefaultProductFacade">
+        <property name="productService" ref="customProductService"/>
+        <property name="productConverter" ref="customProductConverter"/>
     </bean>
 
     <!--

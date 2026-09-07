@@ -33,10 +33,6 @@ while [[ $# -gt 0 ]]; do
             HAC_USER="$2"
             shift 2
             ;;
-        --password)
-            HAC_PASSWORD="$2"
-            shift 2
-            ;;
         --insecure)
             INSECURE=true
             shift
@@ -52,7 +48,6 @@ while [[ $# -gt 0 ]]; do
             echo "  --csv          Output results in CSV format"
             echo "  --url URL      HAC URL (default: $HAC_URL)"
             echo "  --user USER    HAC username (default: admin)"
-            echo "  --password PWD HAC password"
             echo "  --insecure     Disable SSL certificate verification (not recommended)"
             echo "  --cacert FILE  Path to CA certificate bundle for SSL verification"
             echo ""
@@ -80,17 +75,21 @@ if [ -z "$QUERY" ]; then
     exit 1
 fi
 
-if [ -z "$HAC_PASSWORD" ]; then
-    echo "Error: Password is required"
-    echo "Set HAC_PASSWORD environment variable or use --password option"
+# FlexibleSearchService.search executes read-only SELECT queries.
+QUERY_UPPER=$(echo "$QUERY" | tr '[:lower:]' '[:upper:]' | sed 's/^[[:space:]]*//')
+if ! echo "$QUERY_UPPER" | grep -qE '^SELECT([[:space:]]|$)'; then
+    echo "Error: Query must be a read-only FlexibleSearch SELECT"
     exit 1
 fi
 
-# Validate query starts with expected FlexibleSearch keyword
-QUERY_UPPER=$(echo "$QUERY" | tr '[:lower:]' '[:upper:]' | sed 's/^[[:space:]]*//')
-if ! echo "$QUERY_UPPER" | grep -qE '^(SELECT|INSERT|UPDATE|DELETE|REMOVE)\b'; then
-    echo "Error: Query must start with a valid FlexibleSearch keyword (SELECT, INSERT, UPDATE, DELETE, REMOVE)"
-    exit 1
+if [ -z "${HAC_PASSWORD:-}" ]; then
+    if [ -t 0 ]; then
+        read -r -s -p "HAC password: " HAC_PASSWORD
+        echo ""
+    else
+        echo "Error: Set HAC_PASSWORD or run interactively to enter it securely"
+        exit 1
+    fi
 fi
 
 COOKIE_FILE=$(mktemp /tmp/hac_cookies.XXXXXX)
@@ -101,7 +100,7 @@ NETRC_FILE=$(mktemp /tmp/hac_netrc.XXXXXX)
 chmod 600 "$NETRC_FILE"
 printf 'machine %s login %s password %s\n' "$HAC_HOST" "$HAC_USER" "$HAC_PASSWORD" > "$NETRC_FILE"
 
-trap "rm -f $COOKIE_FILE $NETRC_FILE" EXIT
+trap 'rm -f "$COOKIE_FILE" "$NETRC_FILE"' EXIT
 
 # Build SSL arguments
 CURL_SSL_ARGS=()

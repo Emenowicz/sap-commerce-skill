@@ -6,6 +6,7 @@
 package com.example.core.services;
 
 import de.hybris.platform.core.model.product.ProductModel;
+import de.hybris.platform.catalog.model.CatalogVersionModel;
 import java.util.List;
 
 /**
@@ -40,9 +41,10 @@ public interface ProductService {
     /**
      * Update the stock level for a product. This method is transactional.
      * @param productCode the product code
+     * @param warehouseCode warehouse whose stock should be updated
      * @param quantity new stock quantity (must be non-negative)
      */
-    void updateProductStock(String productCode, int quantity);
+    void updateProductStock(String productCode, String warehouseCode, int quantity);
 
     /**
      * Check if product has available stock.
@@ -58,7 +60,7 @@ public interface ProductService {
      * @param catalogVersion the catalog version
      * @return the created ProductModel
      */
-    ProductModel createProduct(String code, String name, String catalogVersion);
+    ProductModel createProduct(String code, String name, CatalogVersionModel catalogVersion);
 
     /**
      * Save changes to a product model.

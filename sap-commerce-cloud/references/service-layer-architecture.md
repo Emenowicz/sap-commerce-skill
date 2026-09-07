@@ -72,7 +72,7 @@ Services encapsulate business logic, validation, and transaction boundaries.
 ```java
 public interface ProductService {
     ProductModel getProductForCode(String code);
-    void updateProductStock(String code, int quantity);
+    void updateProductStock(String code, String warehouseCode, int quantity);
 }
 ```
 
@@ -96,7 +96,7 @@ DAOs encapsulate all data access logic using FlexibleSearch.
 **Interface:**
 ```java
 public interface ProductDAO {
-    ProductModel findByCode(String code);
+    ProductModel findByCodeAndCatalogVersion(String code, CatalogVersionModel catalogVersion);
     List<ProductModel> findByCategory(CategoryModel category);
 }
 ```
@@ -107,10 +107,13 @@ public class DefaultProductDAO implements ProductDAO {
     private FlexibleSearchService flexibleSearchService;
 
     @Override
-    public ProductModel findByCode(String code) {
-        String query = "SELECT {pk} FROM {Product} WHERE {code} = ?code";
+    public ProductModel findByCodeAndCatalogVersion(
+            String code, CatalogVersionModel catalogVersion) {
+        String query = "SELECT {pk} FROM {Product} "
+                + "WHERE {code} = ?code AND {catalogVersion} = ?catalogVersion";
         FlexibleSearchQuery fsQuery = new FlexibleSearchQuery(query);
         fsQuery.addQueryParameter("code", code);
+        fsQuery.addQueryParameter("catalogVersion", catalogVersion);
         SearchResult<ProductModel> result = flexibleSearchService.search(fsQuery);
         return result.getResult().isEmpty() ? null : result.getResult().get(0);
     }
@@ -162,23 +165,24 @@ Configure all components in `*-spring.xml` files.
 
 ```xml
 <!-- DAO Layer -->
-<alias name="defaultProductDAO" alias="productDAO"/>
-<bean id="defaultProductDAO" class="com.example.dao.impl.DefaultProductDAO">
+<alias name="defaultCustomProductDAO" alias="customProductDAO"/>
+<bean id="defaultCustomProductDAO" class="com.example.dao.impl.DefaultProductDAO">
     <property name="flexibleSearchService" ref="flexibleSearchService"/>
 </bean>
 
 <!-- Service Layer -->
-<alias name="defaultProductService" alias="productService"/>
-<bean id="defaultProductService" class="com.example.service.impl.DefaultProductService">
-    <property name="productDAO" ref="productDAO"/>
+<alias name="defaultCustomProductService" alias="customProductService"/>
+<bean id="defaultCustomProductService" class="com.example.service.impl.DefaultProductService">
+    <property name="productDAO" ref="customProductDAO"/>
+    <property name="platformProductService" ref="productService"/>
     <property name="modelService" ref="modelService"/>
 </bean>
 
 <!-- Facade Layer -->
-<alias name="defaultProductFacade" alias="productFacade"/>
-<bean id="defaultProductFacade" class="com.example.facade.impl.DefaultProductFacade">
-    <property name="productService" ref="productService"/>
-    <property name="productConverter" ref="productConverter"/>
+<alias name="defaultCustomProductFacade" alias="customProductFacade"/>
+<bean id="defaultCustomProductFacade" class="com.example.facade.impl.DefaultProductFacade">
+    <property name="productService" ref="customProductService"/>
+    <property name="productConverter" ref="customProductConverter"/>
 </bean>
 ```
 
@@ -193,10 +197,19 @@ Use declarative transactions via Spring annotations.
 **Annotation-Based:**
 ```java
 @Transactional
-public void updateProductStock(String code, int quantity) {
-    ProductModel product = productDAO.findByCode(code);
-    product.setStockLevel(quantity);
-    modelService.save(product);
+public void updateProductStock(String code, String warehouseCode, int quantity) {
+    ProductModel product = platformProductService.getProductForCode(code);
+    WarehouseModel warehouse = warehouseService.getWarehouseForCode(warehouseCode);
+    StockLevelModel stockLevel = stockService.getStockLevel(product, warehouse);
+    if (stockLevel == null) {
+        StockLevelModel newStockLevel = modelService.create(StockLevelModel.class);
+        newStockLevel.setProductCode(product.getCode());
+        newStockLevel.setWarehouse(warehouse);
+        newStockLevel.setAvailable(quantity);
+        modelService.save(newStockLevel);
+    } else {
+        stockService.updateActualStockLevel(product, warehouse, quantity, "Product stock update");
+    }
 }
 ```
 
